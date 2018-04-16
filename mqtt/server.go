@@ -27,7 +27,7 @@ import (
 	"github.com/surge/glog"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"github.com/IvoryRaptor/postoffice/auth"
-	"github.com/IvoryRaptor/postoffice/sessions"
+	"github.com/IvoryRaptor/postoffice/mqtt/sessions"
 	"github.com/IvoryRaptor/postoffice/topics"
 )
 
@@ -238,7 +238,78 @@ func (s *Server) Close() error {
 
 	return nil
 }
+func (s *Server) AddChannel(c net.Conn) (err error){
+	defer func() {
+		if err != nil {
+			c.Close()
+		}
+	}()
 
+	c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(s.ConnectTimeout)))
+
+	resp := message.NewConnackMessage()
+
+	req, err := getConnectMessage(c)
+
+	if err != nil {
+		if cerr, ok := err.(message.ConnackCode); ok {
+			//glog.Debugf("request   message: %s\nresponse message: %s\nerror           : %v", mreq, resp, err)
+			resp.SetReturnCode(cerr)
+			resp.SetSessionPresent(false)
+			writeMessage(c, resp)
+		}
+		return err
+	}
+
+	// Authenticate the user, if error, return error and exit
+	if err = s.authMgr.Authenticate(req); err != nil {
+		resp.SetReturnCode(message.ErrBadUsernameOrPassword)
+		resp.SetSessionPresent(false)
+		writeMessage(c, resp)
+		return err
+	}
+
+	if req.KeepAlive() == 0 {
+		req.SetKeepAlive(minKeepAlive)
+	}
+
+	svc := &service{
+		id:     atomic.AddUint64(&gsvcid, 1),
+		client: false,
+
+		keepAlive:      int(req.KeepAlive()),
+		connectTimeout: s.ConnectTimeout,
+		ackTimeout:     s.AckTimeout,
+		timeoutRetries: s.TimeoutRetries,
+
+		conn:      c,
+		//sessMgr:   kernel.sessMgr,
+		//topicsMgr: kernel.topicsMgr,
+	}
+
+	//err = kernel.getSession(svc, req, resp)
+	//if err != nil {
+	//	return err
+	//}
+
+	resp.SetReturnCode(message.ConnectionAccepted)
+
+	if err = writeMessage(c, resp); err != nil {
+		return err
+	}
+
+	svc.inStat.increment(int64(req.Len()))
+	svc.outStat.increment(int64(resp.Len()))
+
+	if err := svc.start(); err != nil {
+		svc.stop()
+		return err
+	}
+	return nil
+	//s.mu.Lock()
+	//s.svcs = append(s.svcs, svc)
+	//s.mu.Unlock()
+}
 // HandleConnection is for the broker to handle an incoming connection from a client
 func (s *Server) handleConnection(c io.Closer) (svc *service, err error) {
 	if c == nil {

@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"github.com/IvoryRaptor/postoffice/sessions"
+	"github.com/IvoryRaptor/postoffice/mqtt/sessions"
 	"github.com/IvoryRaptor/postoffice/topics"
 )
 
