@@ -82,7 +82,7 @@ type Server struct {
 
 	// authMgr is the authentication manager that we are going to use for authenticating
 	// incoming connections
-	authMgr *auth.Manager
+	authMgr auth.IAuthenticator
 
 	// sessMgr is the sessions manager for keeping track of the sessions
 	sessMgr *sessions.Manager
@@ -291,7 +291,7 @@ func (s *Server) handleConnection(c io.Closer) (svc *service, err error) {
 	}
 
 	// Authenticate the user, if error, return error and exit
-	if err = s.authMgr.Authenticate(string(req.Username()), string(req.Password())); err != nil {
+	if err = s.authMgr.Authenticate(req); err != nil {
 		resp.SetReturnCode(message.ErrBadUsernameOrPassword)
 		resp.SetSessionPresent(false)
 		writeMessage(conn, resp)
@@ -367,8 +367,6 @@ func (s *Server) checkConfiguration() error {
 		if s.Authenticator == "" {
 			s.Authenticator = "mockSuccess"
 		}
-
-		s.authMgr, err = auth.NewManager(s.Authenticator)
 
 		if err != nil {
 			return

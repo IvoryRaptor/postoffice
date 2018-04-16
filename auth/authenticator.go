@@ -15,9 +15,9 @@
 package auth
 
 import (
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"github.com/IvoryRaptor/postoffice"
 	"errors"
+	"github.com/IvoryRaptor/postoffice"
+	"github.com/IvoryRaptor/postoffice/mqtt/message"
 )
 
 var (

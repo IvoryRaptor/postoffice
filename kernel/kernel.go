@@ -5,7 +5,6 @@ import (
 	"os/signal"
 	"syscall"
 	"github.com/IvoryRaptor/postoffice/source"
-	"github.com/IvoryRaptor/postoffice"
 	"net"
 	"time"
 	"sync/atomic"
@@ -14,6 +13,7 @@ import (
 	"github.com/IvoryRaptor/postoffice/auth"
 	"github.com/IvoryRaptor/postoffice/matrix"
 	"github.com/IvoryRaptor/postoffice/mq"
+	"github.com/IvoryRaptor/postoffice"
 )
 
 const (
@@ -58,7 +58,7 @@ func (kernel *Kernel) AddChannel(c net.Conn) (err error){
 		}
 	}()
 
-	c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(kernel.config.ConnectTimeout)))
+	c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(kernel.config.MQTT.ConnectTimeout)))
 
 	resp := message.NewConnackMessage()
 
@@ -91,9 +91,9 @@ func (kernel *Kernel) AddChannel(c net.Conn) (err error){
 		client: false,
 
 		keepAlive:      int(req.KeepAlive()),
-		connectTimeout: kernel.config.ConnectTimeout,
-		ackTimeout:     kernel.config.AckTimeout,
-		timeoutRetries: kernel.config.TimeoutRetries,
+		connectTimeout: kernel.config.MQTT.ConnectTimeout,
+		ackTimeout:     kernel.config.MQTT.AckTimeout,
+		timeoutRetries: kernel.config.MQTT.TimeoutRetries,
 
 		conn:      c,
 		//sessMgr:   kernel.sessMgr,
