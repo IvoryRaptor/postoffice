@@ -8,7 +8,7 @@ import (
 
 func main() {
 	k := kernel.Kernel{
-		ConfigFile: "./config/config.yaml",
+		ConfigFile: "./config/postoffice/config.yaml",
 	}
 	err := k.Config()
 	if err != nil {

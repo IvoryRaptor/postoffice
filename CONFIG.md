@@ -16,3 +16,6 @@ source:
     通道来源配置
 ssl:
     秘钥等内容配置
+
+所有配置文件放置在目录config下，目的是方便部署在kubernetes时，使用config-map替换其中内容
+文件名为：/postoffice/config.yaml

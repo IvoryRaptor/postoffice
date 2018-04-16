@@ -3,19 +3,11 @@ package auth
 import (
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"github.com/IvoryRaptor/postoffice/basex"
+	"github.com/IvoryRaptor/postoffice/helper"
 	"fmt"
 	"net/http"
 	"io/ioutil"
 )
-
-var base62 *basex.Encoding
-var base36 *basex.Encoding
-
-func init() {
-	base62, _ = basex.NewEncoding("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	base36, _ = basex.NewEncoding("0123456789abcdefghijklmnopqrstuvwxyz")
-}
 
 type OAuth struct {
 	url    string
@@ -33,7 +25,7 @@ func (a *OAuth) Start() error{
 
 func (a *OAuth) Authenticate(msg *message.ConnectMessage) error {
 	username := string(msg.Username())
-	data, err := base62.Decode(username)
+	data, err := helper.Base62.Decode(username)
 	if err != nil {
 		return err
 	}
@@ -41,7 +33,7 @@ func (a *OAuth) Authenticate(msg *message.ConnectMessage) error {
 		return ErrAuthFailure
 	}
 
-	matrix := base36.Encode(data[0:15])
+	matrix := helper.Base36.Encode(data[0:15])
 	action := fmt.Sprintf("%x", data[16:])
 
 	m, ok := a.kernel.GetMatrix(matrix)

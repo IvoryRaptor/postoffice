@@ -23,7 +23,7 @@ import (
 
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"github.com/IvoryRaptor/postoffice/mqtt/sessions"
-	"github.com/IvoryRaptor/postoffice/topics"
+	"github.com/IvoryRaptor/postoffice/mqtt/topics"
 )
 
 const (
