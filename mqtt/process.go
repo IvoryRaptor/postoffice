@@ -100,7 +100,6 @@ func (c *client) processIncoming(msg message.Message) error {
 
 	switch msg := msg.(type) {
 	case *message.PublishMessage:
-
 		println("Publish:" + c.actor + string(msg.Topic()))
 
 		// For PUBLISH message, we should figure out what QoS it is and process accordingly
