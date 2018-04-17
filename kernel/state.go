@@ -24,7 +24,7 @@ func (kernel *Kernel)Config()error {
 	if err != nil {
 		return err
 	}
-	kernel.host = host
+	kernel.host = int32(host)
 
 	//Load Config
 	log.Println("Load Config File", kernel.ConfigFile)

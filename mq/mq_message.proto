@@ -1,0 +1,11 @@
+syntax = "proto3";
+package mq;
+
+
+message MQMessage {
+    int32 host = 1; //主机名
+    string actor = 2; //链接
+    string resource = 3; //资源
+    string action = 4; //动作
+    bytes payload = 5; //数据
+}

@@ -13,7 +13,7 @@ type Matrix struct {
 }
 
 type IKernel interface {
-	GetHost() int
+	GetHost() int32
 	Start() error
 	AddChannel(c net.Conn) (err error)
 	GetMatrix(name string) (*Matrix, bool)

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
+	"github.com/IvoryRaptor/postoffice/mq"
 )
 
 var (
@@ -100,7 +101,18 @@ func (c *client) processIncoming(msg message.Message) error {
 
 	switch msg := msg.(type) {
 	case *message.PublishMessage:
-		println("Publish:" + c.actor + string(msg.Topic()))
+		mes := mq.MQMessage{
+			Host:c.kernel.GetHost(),
+			Actor:c.actor,
+			Resource:string(msg.Topic()),
+			Action:string(msg.Topic()),
+			Payload:msg.Payload(),
+		}
+		//[]byte, []int
+		data, _ := mes.Descriptor()
+		println(len(data))
+
+		//println("Publish:" + c.actor + string(msg.Topic()))
 
 		// For PUBLISH message, we should figure out what QoS it is and process accordingly
 		// If QoS == 0, we should just take the next step, no ack required

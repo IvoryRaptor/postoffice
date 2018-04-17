@@ -15,7 +15,7 @@ import (
 )
 
 type Kernel struct {
-	host          int
+	host          int32
 	ConfigFile    string
 	run           bool
 	source        []source.ISource
@@ -30,7 +30,7 @@ func (kernel *Kernel)IsRun() bool {
 	return kernel.run
 }
 
-func (kernel *Kernel)GetHost() int{
+func (kernel *Kernel)GetHost() int32{
 	return kernel.host
 }
 
