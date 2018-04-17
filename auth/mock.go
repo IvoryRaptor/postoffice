@@ -17,6 +17,6 @@ func (a *Mock) Start() error{
 	return nil
 }
 
-func (a *Mock) Authenticate(msg *message.ConnectMessage) error{
+func (a *Mock) Authenticate(msg *message.ConnectMessage) error {
 	return nil
 }
