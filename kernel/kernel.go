@@ -11,6 +11,7 @@ import (
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mqtt"
 	"net"
+	"github.com/IvoryRaptor/postoffice/mqtt/message"
 )
 
 type Kernel struct {
@@ -22,7 +23,7 @@ type Kernel struct {
 	matrixManger  matrix.Manager
 	config        Config
 	mq            mq.IMQ
-	mqtt          mqtt.Server
+	mqtt          mqtt.MQTT
 }
 
 func (kernel *Kernel)IsRun() bool {
@@ -38,7 +39,12 @@ func (kernel *Kernel) GetMatrix(name string) (*postoffice.Matrix, bool) {
 }
 
 func (kernel *Kernel) AddChannel(c net.Conn) (err error){
-	return kernel.mqtt.AddChannel(c)
+	go kernel.mqtt.AddChannel(c)
+	return nil
+}
+
+func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) error{
+	return kernel.authenticator.Authenticate(msg)
 }
 
 func (kernel *Kernel) WaitStop() {

@@ -38,123 +38,123 @@ func NewSubackMessage() *SubackMessage {
 }
 
 // String returns a string representation of the message.
-func (m SubackMessage) String() string {
-	return fmt.Sprintf("%s, Packet ID=%d, Return Codes=%v", m.header, m.PacketId(), m.returnCodes)
+func (this SubackMessage) String() string {
+	return fmt.Sprintf("%s, Packet ID=%d, Return Codes=%v", this.header, this.PacketId(), this.returnCodes)
 }
 
 // ReturnCodes returns the list of QoS returns from the subscriptions sent in the SUBSCRIBE message.
-func (m *SubackMessage) ReturnCodes() []byte {
-	return m.returnCodes
+func (this *SubackMessage) ReturnCodes() []byte {
+	return this.returnCodes
 }
 
 // AddReturnCodes sets the list of QoS returns from the subscriptions sent in the SUBSCRIBE message.
 // An error is returned if any of the QoS values are not valid.
-func (m *SubackMessage) AddReturnCodes(ret []byte) error {
+func (this *SubackMessage) AddReturnCodes(ret []byte) error {
 	for _, c := range ret {
 		if c != QosAtMostOnce && c != QosAtLeastOnce && c != QosExactlyOnce && c != QosFailure {
 			return fmt.Errorf("suback/AddReturnCode: Invalid return code %d. Must be 0, 1, 2, 0x80.", c)
 		}
 
-		m.returnCodes = append(m.returnCodes, c)
+		this.returnCodes = append(this.returnCodes, c)
 	}
 
-	m.dirty = true
+	this.dirty = true
 
 	return nil
 }
 
 // AddReturnCode adds a single QoS return value.
-func (m *SubackMessage) AddReturnCode(ret byte) error {
-	return m.AddReturnCodes([]byte{ret})
+func (this *SubackMessage) AddReturnCode(ret byte) error {
+	return this.AddReturnCodes([]byte{ret})
 }
 
-func (m *SubackMessage) Len() int {
-	if !m.dirty {
-		return len(m.dbuf)
+func (this *SubackMessage) Len() int {
+	if !this.dirty {
+		return len(this.dbuf)
 	}
 
-	ml := m.msglen()
+	ml := this.msglen()
 
-	if err := m.SetRemainingLength(int32(ml)); err != nil {
+	if err := this.SetRemainingLength(int32(ml)); err != nil {
 		return 0
 	}
 
-	return m.header.msglen() + ml
+	return this.header.msglen() + ml
 }
 
-func (m *SubackMessage) Decode(src []byte) (int, error) {
+func (this *SubackMessage) Decode(src []byte) (int, error) {
 	total := 0
 
-	hn, err := m.header.decode(src[total:])
+	hn, err := this.header.decode(src[total:])
 	total += hn
 	if err != nil {
 		return total, err
 	}
 
-	//m.packetId = binary.BigEndian.Uint16(src[total:])
-	m.packetId = src[total : total+2]
+	//this.packetId = binary.BigEndian.Uint16(src[total:])
+	this.packetId = src[total : total+2]
 	total += 2
 
-	l := int(m.remlen) - (total - hn)
-	m.returnCodes = src[total : total+l]
-	total += len(m.returnCodes)
+	l := int(this.remlen) - (total - hn)
+	this.returnCodes = src[total : total+l]
+	total += len(this.returnCodes)
 
-	for i, code := range m.returnCodes {
+	for i, code := range this.returnCodes {
 		if code != 0x00 && code != 0x01 && code != 0x02 && code != 0x80 {
 			return total, fmt.Errorf("suback/Decode: Invalid return code %d for topic %d", code, i)
 		}
 	}
 
-	m.dirty = false
+	this.dirty = false
 
 	return total, nil
 }
 
-func (m *SubackMessage) Encode(dst []byte) (int, error) {
-	if !m.dirty {
-		if len(dst) < len(m.dbuf) {
-			return 0, fmt.Errorf("suback/Encode: Insufficient buffer size. Expecting %d, got %d.", len(m.dbuf), len(dst))
+func (this *SubackMessage) Encode(dst []byte) (int, error) {
+	if !this.dirty {
+		if len(dst) < len(this.dbuf) {
+			return 0, fmt.Errorf("suback/Encode: Insufficient buffer size. Expecting %d, got %d.", len(this.dbuf), len(dst))
 		}
 
-		return copy(dst, m.dbuf), nil
+		return copy(dst, this.dbuf), nil
 	}
 
-	for i, code := range m.returnCodes {
+	for i, code := range this.returnCodes {
 		if code != 0x00 && code != 0x01 && code != 0x02 && code != 0x80 {
 			return 0, fmt.Errorf("suback/Encode: Invalid return code %d for topic %d", code, i)
 		}
 	}
 
-	hl := m.header.msglen()
-	ml := m.msglen()
+	hl := this.header.msglen()
+	ml := this.msglen()
 
 	if len(dst) < hl+ml {
 		return 0, fmt.Errorf("suback/Encode: Insufficient buffer size. Expecting %d, got %d.", hl+ml, len(dst))
 	}
 
-	if err := m.SetRemainingLength(int32(ml)); err != nil {
+	if err := this.SetRemainingLength(int32(ml)); err != nil {
 		return 0, err
 	}
 
 	total := 0
 
-	n, err := m.header.encode(dst[total:])
+	n, err := this.header.encode(dst[total:])
 	total += n
 	if err != nil {
 		return total, err
 	}
 
-	if copy(dst[total:total+2], m.packetId) != 2 {
+	if copy(dst[total:total+2], this.packetId) != 2 {
 		dst[total], dst[total+1] = 0, 0
 	}
 	total += 2
 
-	copy(dst[total:], m.returnCodes)
-	total += len(m.returnCodes)
+	copy(dst[total:], this.returnCodes)
+	total += len(this.returnCodes)
 
 	return total, nil
 }
 
-func (m *SubackMessage) msglen() int {
-	return 2 + len(m.returnCodes)
+func (this *SubackMessage) msglen() int {
+	return 2 + len(this.returnCodes)
 }

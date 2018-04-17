@@ -31,71 +31,71 @@ func NewPubackMessage() *PubackMessage {
 	return msg
 }
 
-func (m PubackMessage) String() string {
-	return fmt.Sprintf("%s, Packet ID=%d", m.header, m.packetId)
+func (this PubackMessage) String() string {
+	return fmt.Sprintf("%s, Packet ID=%d", this.header, this.packetId)
 }
 
-func (m *PubackMessage) Len() int {
-	if !m.dirty {
-		return len(m.dbuf)
+func (this *PubackMessage) Len() int {
+	if !this.dirty {
+		return len(this.dbuf)
 	}
 
-	ml := m.msglen()
+	ml := this.msglen()
 
-	if err := m.SetRemainingLength(int32(ml)); err != nil {
+	if err := this.SetRemainingLength(int32(ml)); err != nil {
 		return 0
 	}
 
-	return m.header.msglen() + ml
+	return this.header.msglen() + ml
 }
 
-func (m *PubackMessage) Decode(src []byte) (int, error) {
+func (this *PubackMessage) Decode(src []byte) (int, error) {
 	total := 0
 
-	n, err := m.header.decode(src[total:])
+	n, err := this.header.decode(src[total:])
 	total += n
 	if err != nil {
 		return total, err
 	}
 
-	//m.packetId = binary.BigEndian.Uint16(src[total:])
-	m.packetId = src[total : total+2]
+	//this.packetId = binary.BigEndian.Uint16(src[total:])
+	this.packetId = src[total : total+2]
 	total += 2
 
-	m.dirty = false
+	this.dirty = false
 
 	return total, nil
 }
 
-func (m *PubackMessage) Encode(dst []byte) (int, error) {
-	if !m.dirty {
-		if len(dst) < len(m.dbuf) {
-			return 0, fmt.Errorf("puback/Encode: Insufficient buffer size. Expecting %d, got %d.", len(m.dbuf), len(dst))
+func (this *PubackMessage) Encode(dst []byte) (int, error) {
+	if !this.dirty {
+		if len(dst) < len(this.dbuf) {
+			return 0, fmt.Errorf("puback/Encode: Insufficient buffer size. Expecting %d, got %d.", len(this.dbuf), len(dst))
 		}
 
-		return copy(dst, m.dbuf), nil
+		return copy(dst, this.dbuf), nil
 	}
 
-	hl := m.header.msglen()
-	ml := m.msglen()
+	hl := this.header.msglen()
+	ml := this.msglen()
 
 	if len(dst) < hl+ml {
 		return 0, fmt.Errorf("puback/Encode: Insufficient buffer size. Expecting %d, got %d.", hl+ml, len(dst))
 	}
 
-	if err := m.SetRemainingLength(int32(ml)); err != nil {
+	if err := this.SetRemainingLength(int32(ml)); err != nil {
 		return 0, err
 	}
 
 	total := 0
 
-	n, err := m.header.encode(dst[total:])
+	n, err := this.header.encode(dst[total:])
 	total += n
 	if err != nil {
 		return total, err
 	}
 
-	if copy(dst[total:total+2], m.packetId) != 2 {
+	if copy(dst[total:total+2], this.packetId) != 2 {
 		dst[total], dst[total+1] = 0, 0
 	}
 	total += 2
@@ -103,7 +103,7 @@ func (m *PubackMessage) Encode(dst []byte) (int, error) {
 	return total, nil
 }
 
-func (m *PubackMessage) msglen() int {
+func (this *PubackMessage) msglen() int {
 	// packet ID
 	return 2
 }

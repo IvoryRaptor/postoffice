@@ -19,21 +19,19 @@ import (
 	"fmt"
 	"io"
 	"net"
-
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 )
 
 func getConnectMessage(conn io.Closer) (*message.ConnectMessage, error) {
 	buf, err := getMessageBuffer(conn)
-
 	if err != nil {
 		//glog.Debugf("Receive error: %v", err)
 		return nil, err
 	}
+
 	msg := message.NewConnectMessage()
 
 	_, err = msg.Decode(buf)
-
 	//glog.Debugf("Received: %s", msg)
 	return msg, err
 }
@@ -68,12 +66,10 @@ func getMessageBuffer(c io.Closer) ([]byte, error) {
 	if c == nil {
 		return nil, ErrInvalidConnectionType
 	}
-
 	conn, ok := c.(net.Conn)
 	if !ok {
 		return nil, ErrInvalidConnectionType
 	}
-
 	var (
 		// the message buffer
 		buf []byte
@@ -91,7 +87,6 @@ func getMessageBuffer(c io.Closer) ([]byte, error) {
 		if l > 5 {
 			return nil, fmt.Errorf("connect/getMessage: 4th byte of remaining length has continuation bit set")
 		}
-
 		n, err := conn.Read(b[0:])
 		if err != nil {
 			//glog.Debugf("Read error: %v", err)

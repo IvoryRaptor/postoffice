@@ -32,18 +32,18 @@ func NewDisconnectMessage() *DisconnectMessage {
 	return msg
 }
 
-func (m *DisconnectMessage) Decode(src []byte) (int, error) {
-	return m.header.decode(src)
+func (this *DisconnectMessage) Decode(src []byte) (int, error) {
+	return this.header.decode(src)
 }
 
-func (m *DisconnectMessage) Encode(dst []byte) (int, error) {
-	if !m.dirty {
-		if len(dst) < len(m.dbuf) {
-			return 0, fmt.Errorf("disconnect/Encode: Insufficient buffer size. Expecting %d, got %d.", len(m.dbuf), len(dst))
+func (this *DisconnectMessage) Encode(dst []byte) (int, error) {
+	if !this.dirty {
+		if len(dst) < len(this.dbuf) {
+			return 0, fmt.Errorf("disconnect/Encode: Insufficient buffer size. Expecting %d, got %d.", len(this.dbuf), len(dst))
 		}
 
-		return copy(dst, m.dbuf), nil
+		return copy(dst, this.dbuf), nil
 	}
 
-	return m.header.encode(dst)
+	return this.header.encode(dst)
 }

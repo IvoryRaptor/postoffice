@@ -34,15 +34,15 @@ const (
 	QosAtMostOnce byte = iota
 
 	// QoS 1: At least once delivery
-	// This quality of mqtt ensures that the message arrives at the receiver at least once.
+	// This quality of service ensures that the message arrives at the receiver at least once.
 	// A QoS 1 PUBLISH Packet has a Packet Identifier in its variable header and is acknowledged
 	// by a PUBACK Packet. Section 2.3.1 provides more information about Packet Identifiers.
 	QosAtLeastOnce
 
 	// QoS 2: Exactly once delivery
-	// This is the highest quality of mqtt, for use when neither loss nor duplication of
+	// This is the highest quality of service, for use when neither loss nor duplication of
 	// messages are acceptable. There is an increased overhead associated with this quality of
-	// mqtt.
+	// service.
 	QosExactlyOnce
 
 	// QosFailure is a return value for a subscription if there's a problem while subscribing

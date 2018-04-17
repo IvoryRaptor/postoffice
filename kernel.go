@@ -3,6 +3,7 @@ package postoffice
 import (
 	"net"
 	"sync"
+	"github.com/IvoryRaptor/postoffice/mqtt/message"
 )
 
 type Matrix struct {
@@ -16,4 +17,5 @@ type IKernel interface {
 	Start() error
 	AddChannel(c net.Conn) (err error)
 	GetMatrix(name string) (*Matrix, bool)
+	Authenticate(msg *message.ConnectMessage) error
 }

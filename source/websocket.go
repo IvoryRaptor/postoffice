@@ -81,7 +81,7 @@ func (w *WebSocketSource) Config(kernel postoffice.IKernel, config Config,crt st
 	w.crt = crt
 	w.kernel = kernel
 	var upgrader = websocket.Upgrader{
-		Subprotocols: []string{"mqttv3.1", "mqtt", "mqttv3.1.1"},
+		Subprotocols: []string{"mqttv3.1", "mqtt_back", "mqttv3.1.1"},
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
@@ -89,7 +89,7 @@ func (w *WebSocketSource) Config(kernel postoffice.IKernel, config Config,crt st
 	w.server = &http.Server{Addr: fmt.Sprintf(":%d", config.Port)}
 	w.ssl = config.SSL
 
-	http.HandleFunc("/mqtt", func(res http.ResponseWriter, req *http.Request) {
+	http.HandleFunc("/mqtt_back", func(res http.ResponseWriter, req *http.Request) {
 
 		//chDone := make(chan bool)
 		c, err := upgrader.Upgrade(res, req, nil)
