@@ -43,98 +43,98 @@ func (r timeoutReader) Read(b []byte) (int, error) {
 }
 
 // receiver() reads data from the network, and writes the data into the incoming buffer
-func (this *service) receiver() {
+func (c *client) receiver() {
 	defer func() {
 		// Let's recover from panic
 		if r := recover(); r != nil {
-			glog.Errorf("(%s) Recovering from panic: %v", this.cid(), r)
+			glog.Errorf("(%s) Recovering from panic: %v", c.cid(), r)
 		}
 
-		this.wgStopped.Done()
+		c.wgStopped.Done()
 
-		glog.Debugf("(%s) Stopping receiver", this.cid())
+		glog.Debugf("(%s) Stopping receiver", c.cid())
 	}()
 
-	glog.Debugf("(%s) Starting receiver", this.cid())
+	glog.Debugf("(%s) Starting receiver", c.cid())
 
-	this.wgStarted.Done()
+	c.wgStarted.Done()
 
-	switch conn := this.conn.(type) {
+	switch conn := c.conn.(type) {
 	case net.Conn:
-		//glog.Debugf("server/handleConnection: Setting read deadline to %d", time.Second*time.Duration(this.keepAlive))
-		keepAlive := time.Second * time.Duration(this.keepAlive)
+		//glog.Debugf("server/handleConnection: Setting read deadline to %d", time.Second*time.Duration(c.keepAlive))
+		keepAlive := time.Second * time.Duration(c.keepAlive)
 		r := timeoutReader{
 			d:    keepAlive + (keepAlive / 2),
 			conn: conn,
 		}
 
 		for {
-			_, err := this.in.ReadFrom(r)
+			_, err := c.in.ReadFrom(r)
 
 			if err != nil {
 				if err != io.EOF {
-					glog.Errorf("(%s) error reading from connection: %v", this.cid(), err)
+					glog.Errorf("(%s) error reading from connection: %v", c.cid(), err)
 				}
 				return
 			}
 		}
 
 	//case *websocket.Conn:
-	//	glog.Errorf("(%s) Websocket: %v", this.cid(), ErrInvalidConnectionType)
+	//	glog.Errorf("(%s) Websocket: %v", c.cid(), ErrInvalidConnectionType)
 
 	default:
-		glog.Errorf("(%s) %v", this.cid(), ErrInvalidConnectionType)
+		glog.Errorf("(%s) %v", c.cid(), ErrInvalidConnectionType)
 	}
 }
 
 // sender() writes data from the outgoing buffer to the network
-func (this *service) sender() {
+func (c *client) sender() {
 	defer func() {
 		// Let's recover from panic
 		if r := recover(); r != nil {
-			glog.Errorf("(%s) Recovering from panic: %v", this.cid(), r)
+			glog.Errorf("(%s) Recovering from panic: %v", c.cid(), r)
 		}
 
-		this.wgStopped.Done()
+		c.wgStopped.Done()
 
-		glog.Debugf("(%s) Stopping sender", this.cid())
+		glog.Debugf("(%s) Stopping sender", c.cid())
 	}()
 
-	glog.Debugf("(%s) Starting sender", this.cid())
+	glog.Debugf("(%s) Starting sender", c.cid())
 
-	this.wgStarted.Done()
+	c.wgStarted.Done()
 
-	switch conn := this.conn.(type) {
+	switch conn := c.conn.(type) {
 	case net.Conn:
 		for {
-			_, err := this.out.WriteTo(conn)
+			_, err := c.out.WriteTo(conn)
 
 			if err != nil {
 				if err != io.EOF {
-					glog.Errorf("(%s) error writing data: %v", this.cid(), err)
+					glog.Errorf("(%s) error writing data: %v", c.cid(), err)
 				}
 				return
 			}
 		}
 
 	//case *websocket.Conn:
-	//	glog.Errorf("(%s) Websocket not supported", this.cid())
+	//	glog.Errorf("(%s) Websocket not supported", c.cid())
 
 	default:
-		glog.Errorf("(%s) Invalid connection type", this.cid())
+		glog.Errorf("(%s) Invalid connection type", c.cid())
 	}
 }
 
 // peekMessageSize() reads, but not commits, enough bytes to determine the size of
 // the next message and returns the type and size.
-func (this *service) peekMessageSize() (message.MessageType, int, error) {
+func (c *client) peekMessageSize() (message.MessageType, int, error) {
 	var (
 		b   []byte
 		err error
 		cnt int = 2
 	)
 
-	if this.in == nil {
+	if c.in == nil {
 		err = ErrBufferNotReady
 		return 0, 0, err
 	}
@@ -147,7 +147,7 @@ func (this *service) peekMessageSize() (message.MessageType, int, error) {
 		}
 
 		// Peek cnt bytes from the input buffer.
-		b, err = this.in.ReadWait(cnt)
+		b, err = c.in.ReadWait(cnt)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -179,7 +179,7 @@ func (this *service) peekMessageSize() (message.MessageType, int, error) {
 
 // peekMessage() reads a message from the buffer, but the bytes are NOT committed.
 // This means the buffer still thinks the bytes are not read yet.
-func (this *service) peekMessage(mtype message.MessageType, total int) (message.Message, int, error) {
+func (c *client) peekMessage(mtype message.MessageType, total int) (message.Message, int, error) {
 	var (
 		b    []byte
 		err  error
@@ -187,14 +187,14 @@ func (this *service) peekMessage(mtype message.MessageType, total int) (message.
 		msg  message.Message
 	)
 
-	if this.in == nil {
+	if c.in == nil {
 		return nil, 0, ErrBufferNotReady
 	}
 
 	// Peek until we get total bytes
 	for i = 0; ; i++ {
 		// Peek remlen bytes from the input buffer.
-		b, err = this.in.ReadWait(total)
+		b, err = c.in.ReadWait(total)
 		if err != nil && err != ErrBufferInsufficientData {
 			return nil, 0, err
 		}
@@ -216,7 +216,7 @@ func (this *service) peekMessage(mtype message.MessageType, total int) (message.
 
 // readMessage() reads and copies a message from the buffer. The buffer bytes are
 // committed as a result of the read.
-func (this *service) readMessage(mtype message.MessageType, total int) (message.Message, int, error) {
+func (c *client) readMessage(mtype message.MessageType, total int) (message.Message, int, error) {
 	var (
 		b   []byte
 		err error
@@ -224,19 +224,19 @@ func (this *service) readMessage(mtype message.MessageType, total int) (message.
 		msg message.Message
 	)
 
-	if this.in == nil {
+	if c.in == nil {
 		err = ErrBufferNotReady
 		return nil, 0, err
 	}
 
-	if len(this.intmp) < total {
-		this.intmp = make([]byte, total)
+	if len(c.intmp) < total {
+		c.intmp = make([]byte, total)
 	}
 
 	// Read until we get total bytes
 	l := 0
 	for l < total {
-		n, err = this.in.Read(this.intmp[l:])
+		n, err = c.in.Read(c.intmp[l:])
 		l += n
 		glog.Debugf("read %d bytes, total %d", n, l)
 		if err != nil {
@@ -244,7 +244,7 @@ func (this *service) readMessage(mtype message.MessageType, total int) (message.
 		}
 	}
 
-	b = this.intmp[:total]
+	b = c.intmp[:total]
 
 	msg, err = mtype.New()
 	if err != nil {
@@ -256,7 +256,7 @@ func (this *service) readMessage(mtype message.MessageType, total int) (message.
 }
 
 // writeMessage() writes a message to the outgoing buffer
-func (this *service) writeMessage(msg message.Message) (int, error) {
+func (c *client) writeMessage(msg message.Message) (int, error) {
 	var (
 		l    int = msg.Len()
 		m, n int
@@ -265,41 +265,41 @@ func (this *service) writeMessage(msg message.Message) (int, error) {
 		wrap bool
 	)
 
-	if this.out == nil {
+	if c.out == nil {
 		return 0, ErrBufferNotReady
 	}
 
 	// This is to serialize writes to the underlying buffer. Multiple goroutines could
 	// potentially get here because of calling Publish() or Subscribe() or other
 	// functions that will send messages. For example, if a message is received in
-	// another connetion, and the message needs to be published to this client, then
+	// another connetion, and the message needs to be published to c client, then
 	// the Publish() function is called, and at the same time, another client could
 	// do exactly the same thing.
 	//
 	// Not an ideal fix though. If possible we should remove mutex and be lockfree.
 	// Mainly because when there's a large number of goroutines that want to publish
-	// to this client, then they will all block. However, this will do for now.
+	// to c client, then they will all block. However, c will do for now.
 	//
 	// FIXME: Try to find a better way than a mutex...if possible.
-	this.wmu.Lock()
-	defer this.wmu.Unlock()
+	c.wmu.Lock()
+	defer c.wmu.Unlock()
 
-	buf, wrap, err = this.out.WriteWait(l)
+	buf, wrap, err = c.out.WriteWait(l)
 	if err != nil {
 		return 0, err
 	}
 
 	if wrap {
-		if len(this.outtmp) < l {
-			this.outtmp = make([]byte, l)
+		if len(c.outtmp) < l {
+			c.outtmp = make([]byte, l)
 		}
 
-		n, err = msg.Encode(this.outtmp[0:])
+		n, err = msg.Encode(c.outtmp[0:])
 		if err != nil {
 			return 0, err
 		}
 
-		m, err = this.out.Write(this.outtmp[0:n])
+		m, err = c.out.Write(c.outtmp[0:n])
 		if err != nil {
 			return m, err
 		}
@@ -309,13 +309,13 @@ func (this *service) writeMessage(msg message.Message) (int, error) {
 			return 0, err
 		}
 
-		m, err = this.out.WriteCommit(n)
+		m, err = c.out.WriteCommit(n)
 		if err != nil {
 			return 0, err
 		}
 	}
 
-	this.outStat.increment(int64(m))
+	c.outStat.increment(int64(m))
 
 	return m, nil
 }

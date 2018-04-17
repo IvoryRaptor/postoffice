@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	ErrInvalidConnectionType  error = errors.New("service: Invalid connection type")
-	ErrInvalidSubscriber      error = errors.New("service: Invalid subscriber")
-	ErrBufferNotReady         error = errors.New("service: buffer is not ready")
-	ErrBufferInsufficientData error = errors.New("service: buffer has insufficient data.")
+	ErrInvalidConnectionType  error = errors.New("client: Invalid connection type")
+	ErrInvalidSubscriber      error = errors.New("client: Invalid subscriber")
+	ErrBufferNotReady         error = errors.New("client: buffer is not ready")
+	ErrBufferInsufficientData error = errors.New("client: buffer has insufficient data.")
 )
 
 const (
@@ -58,7 +58,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 		req.SetKeepAlive(minKeepAlive)
 	}
 
-	svc := &service{
+	svc := &client{
 		id:     atomic.AddUint64(&gsvcid, 1),
 		client: false,
 
@@ -66,12 +66,12 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 		connectTimeout: m.config.ConnectTimeout,
 		ackTimeout:     m.config.AckTimeout,
 		timeoutRetries: m.config.TimeoutRetries,
-
-		conn:      conn,
+		actor:          string(req.ClientId()),
+		conn:           conn,
+		kernel: m.kernel,
 		//sessMgr:   this.sessMgr,
 		//topicsMgr: this.topicsMgr,
 	}
-
 	resp.SetReturnCode(message.ConnectionAccepted)
 
 	if err = writeMessage(conn, resp); err != nil {

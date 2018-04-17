@@ -19,9 +19,9 @@ import (
 	"io"
 	"sync"
 	"sync/atomic"
-
 	"github.com/surge/glog"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
+	"github.com/IvoryRaptor/postoffice"
 )
 
 type (
@@ -43,9 +43,10 @@ var (
 	gsvcid uint64 = 0
 )
 
-type service struct {
-	// The ID of this service, it's not related to the Client ID, just a number that's
-	// incremented for every new service.
+type client struct {
+	actor string
+	// The ID of this client, it's not related to the Client ID, just a number that's
+	// incremented for every new client.
 	id uint64
 
 	// Is this a client or server. It's set by either Connect (client) or
@@ -68,7 +69,7 @@ type service struct {
 	// If no set then default to 3 retries.
 	timeoutRetries int
 
-	// Network connection for this service
+	// Network connection for this client
 	conn io.Closer
 
 	// Wait for the various goroutines to finish starting and stopping
@@ -78,10 +79,10 @@ type service struct {
 	// writeMessage mutex - serializes writes to the outgoing buffer.
 	wmu sync.Mutex
 
-	// Whether this is service is closed or not.
+	// Whether this is client is closed or not.
 	closed int64
 
-	// Quit signal for determining when this service should end. If channel is closed,
+	// Quit signal for determining when this client should end. If channel is closed,
 	// then exit.
 	done chan struct{}
 
@@ -106,148 +107,149 @@ type service struct {
 	intmp  []byte
 	outtmp []byte
 
-	subs  []interface{}
-	qoss  []byte
-	rmsgs []*message.PublishMessage
+	subs   []interface{}
+	qoss   []byte
+	rmsgs  []*message.PublishMessage
+	kernel postoffice.IKernel
 }
 
-func (this *service) start() error {
+func (c *client) start() error {
 	var err error
 
 	// Create the incoming ring buffer
-	this.in, err = newBuffer(defaultBufferSize)
+	c.in, err = newBuffer(defaultBufferSize)
 	if err != nil {
 		return err
 	}
 
 	// Create the outgoing ring buffer
-	this.out, err = newBuffer(defaultBufferSize)
+	c.out, err = newBuffer(defaultBufferSize)
 	if err != nil {
 		return err
 	}
 
-	// If this is a server
-	if !this.client {
+	// If c is a server
+	if !c.client {
 		// Creat the onPublishFunc so it can be used for published messages
-		this.onpub = func(msg *message.PublishMessage) error {
-			if err := this.publish(msg, nil); err != nil {
-				glog.Errorf("service/onPublish: Error publishing message: %v", err)
+		c.onpub = func(msg *message.PublishMessage) error {
+			if err := c.publish(msg, nil); err != nil {
+				glog.Errorf("client/onPublish: Error publishing message: %v", err)
 				return err
 			}
 
 			return nil
 		}
 
-		// If this is a recovered session, then add any topics it subscribed before
-		//topics, qoss, err := this.sess.Topics()
+		// If c is a recovered session, then add any topics it subscribed before
+		//topics, qoss, err := c.sess.Topics()
 		//if err != nil {
 		//	return err
 		//} else {
 		//	for i, t := range topics {
-		//		this.topicsMgr.Subscribe([]byte(t), qoss[i], &this.onpub)
+		//		c.topicsMgr.Subscribe([]byte(t), qoss[i], &c.onpub)
 		//	}
 		//}
 	}
 
 	// Processor is responsible for reading messages out of the buffer and processing
 	// them accordingly.
-	this.wgStarted.Add(1)
-	this.wgStopped.Add(1)
-	go this.processor()
+	c.wgStarted.Add(1)
+	c.wgStopped.Add(1)
+	go c.processor()
 
 	// Receiver is responsible for reading from the connection and putting data into
 	// a buffer.
-	this.wgStarted.Add(1)
-	this.wgStopped.Add(1)
-	go this.receiver()
+	c.wgStarted.Add(1)
+	c.wgStopped.Add(1)
+	go c.receiver()
 
 	// Sender is responsible for writing data in the buffer into the connection.
-	this.wgStarted.Add(1)
-	this.wgStopped.Add(1)
-	go this.sender()
+	c.wgStarted.Add(1)
+	c.wgStopped.Add(1)
+	go c.sender()
 
 	// Wait for all the goroutines to start before returning
-	this.wgStarted.Wait()
+	c.wgStarted.Wait()
 
 	return nil
 }
 
 // FIXME: The order of closing here causes panic sometimes. For example, if receiver
 // calls this, and closes the buffers, somehow it causes buffer.go:476 to panid.
-func (this *service) stop() {
+func (c *client) stop() {
 	defer func() {
 		// Let's recover from panic
 		if r := recover(); r != nil {
-			glog.Errorf("(%s) Recovering from panic: %v", this.cid(), r)
+			glog.Errorf("(%s) Recovering from panic: %v", c.cid(), r)
 		}
 	}()
 
-	doit := atomic.CompareAndSwapInt64(&this.closed, 0, 1)
+	doit := atomic.CompareAndSwapInt64(&c.closed, 0, 1)
 	if !doit {
 		return
 	}
 
 	// Close quit channel, effectively telling all the goroutines it's time to quit
-	if this.done != nil {
-		glog.Debugf("(%s) closing this.done", this.cid())
-		close(this.done)
+	if c.done != nil {
+		glog.Debugf("(%s) closing c.done", c.cid())
+		close(c.done)
 	}
 
 	// Close the network connection
-	if this.conn != nil {
-		glog.Debugf("(%s) closing this.conn", this.cid())
-		this.conn.Close()
+	if c.conn != nil {
+		glog.Debugf("(%s) closing c.conn", c.cid())
+		c.conn.Close()
 	}
 
-	this.in.Close()
-	this.out.Close()
+	c.in.Close()
+	c.out.Close()
 
 	// Wait for all the goroutines to stop.
-	this.wgStopped.Wait()
+	c.wgStopped.Wait()
 
-	glog.Debugf("(%s) Received %d bytes in %d messages.", this.cid(), this.inStat.bytes, this.inStat.msgs)
-	glog.Debugf("(%s) Sent %d bytes in %d messages.", this.cid(), this.outStat.bytes, this.outStat.msgs)
+	glog.Debugf("(%s) Received %d bytes in %d messages.", c.cid(), c.inStat.bytes, c.inStat.msgs)
+	glog.Debugf("(%s) Sent %d bytes in %d messages.", c.cid(), c.outStat.bytes, c.outStat.msgs)
 
-	// Unsubscribe from all the topics for this client, only for the server side though
-	//if !this.client && this.sess != nil {
-	//	topics, _, err := this.sess.Topics()
+	// Unsubscribe from all the topics for c client, only for the server side though
+	//if !c.client && c.sess != nil {
+	//	topics, _, err := c.sess.Topics()
 	//	if err != nil {
-	//		glog.Errorf("(%s/%d): %v", this.cid(), this.id, err)
+	//		glog.Errorf("(%s/%d): %v", c.cid(), c.id, err)
 	//	} else {
 	//		for _, t := range topics {
-	//			if err := this.topicsMgr.Unsubscribe([]byte(t), &this.onpub); err != nil {
-	//				glog.Errorf("(%s): Error unsubscribing topic %q: %v", this.cid(), t, err)
+	//			if err := c.topicsMgr.Unsubscribe([]byte(t), &c.onpub); err != nil {
+	//				glog.Errorf("(%s): Error unsubscribing topic %q: %v", c.cid(), t, err)
 	//			}
 	//		}
 	//	}
 	//}
 	//
 	//// Publish will message if WillFlag is set. Server side only.
-	//if !this.client && this.sess.Cmsg.WillFlag() {
-	//	glog.Infof("(%s) service/stop: connection unexpectedly closed. Sending Will.", this.cid())
-	//	this.onPublish(this.sess.Will)
+	//if !c.client && c.sess.Cmsg.WillFlag() {
+	//	glog.Infof("(%s) client/stop: connection unexpectedly closed. Sending Will.", c.cid())
+	//	c.onPublish(c.sess.Will)
 	//}
 	//
 	//// Remove the client topics manager
-	//if this.client {
-	//	topics.Unregister(this.sess.ID())
+	//if c.client {
+	//	topics.Unregister(c.sess.ID())
 	//}
 	//
 	//// Remove the session from session store if it's suppose to be clean session
-	//if this.sess.Cmsg.CleanSession() && this.sessMgr != nil {
-	//	this.sessMgr.Del(this.sess.ID())
+	//if c.sess.Cmsg.CleanSession() && c.sessMgr != nil {
+	//	c.sessMgr.Del(c.sess.ID())
 	//}
 
-	this.conn = nil
-	this.in = nil
-	this.out = nil
+	c.conn = nil
+	c.in = nil
+	c.out = nil
 }
 
-func (this *service) publish(msg *message.PublishMessage, onComplete OnCompleteFunc) error {
-	//glog.Debugf("service/publish: Publishing %s", msg)
-	_, err := this.writeMessage(msg)
+func (c *client) publish(msg *message.PublishMessage, onComplete OnCompleteFunc) error {
+	//glog.Debugf("client/publish: Publishing %s", msg)
+	_, err := c.writeMessage(msg)
 	if err != nil {
-		return fmt.Errorf("(%s) Error sending %s message: %v", this.cid(), msg.Name(), err)
+		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)
 	}
 
 	switch msg.QoS() {
@@ -259,23 +261,23 @@ func (this *service) publish(msg *message.PublishMessage, onComplete OnCompleteF
 		return nil
 
 	case message.QosAtLeastOnce:
-		//return this.sess.Pub1ack.Wait(msg, onComplete)
+		//return c.sess.Pub1ack.Wait(msg, onComplete)
 
 	case message.QosExactlyOnce:
-		//return this.sess.Pub2out.Wait(msg, onComplete)
+		//return c.sess.Pub2out.Wait(msg, onComplete)
 	}
 
 	return nil
 }
 
-func (this *service) subscribe(msg *message.SubscribeMessage, onComplete OnCompleteFunc, onPublish OnPublishFunc) error {
+func (c *client) subscribe(msg *message.SubscribeMessage, onComplete OnCompleteFunc, onPublish OnPublishFunc) error {
 	if onPublish == nil {
 		return fmt.Errorf("onPublish function is nil. No need to subscribe.")
 	}
 
-	_, err := this.writeMessage(msg)
+	_, err := c.writeMessage(msg)
 	if err != nil {
-		return fmt.Errorf("(%s) Error sending %s message: %v", this.cid(), msg.Name(), err)
+		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)
 	}
 
 	var onc OnCompleteFunc = func(msg, ack message.Message, err error) error {
@@ -331,8 +333,8 @@ func (this *service) subscribe(msg *message.SubscribeMessage, onComplete OnCompl
 			if c == message.QosFailure {
 				err2 = fmt.Errorf("Failed to subscribe to '%s'\n%v", string(t), err2)
 			} else {
-				//this.sess.AddTopic(string(t), c)
-				//_, err := this.topicsMgr.Subscribe(t, c, &onPublish)
+				//c.sess.AddTopic(string(t), c)
+				//_, err := c.topicsMgr.Subscribe(t, c, &onPublish)
 				//if err != nil {
 				//	err2 = fmt.Errorf("Failed to subscribe to '%s' (%v)\n%v", string(t), err, err2)
 				//}
@@ -347,13 +349,13 @@ func (this *service) subscribe(msg *message.SubscribeMessage, onComplete OnCompl
 	}
 	println(onc)
 	return nil
-	//return this.sess.Suback.Wait(msg, onc)
+	//return c.sess.Suback.Wait(msg, onc)
 }
 
-func (this *service) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnCompleteFunc) error {
-	_, err := this.writeMessage(msg)
+func (c *client) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnCompleteFunc) error {
+	_, err := c.writeMessage(msg)
 	if err != nil {
-		return fmt.Errorf("(%s) Error sending %s message: %v", this.cid(), msg.Name(), err)
+		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)
 	}
 
 	var onc OnCompleteFunc = func(msg, ack message.Message, err error) error {
@@ -392,14 +394,14 @@ func (this *service) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnC
 		var err2 error = nil
 
 		//for _, tb := range unsub.Topics() {
-		//	// Remove all subscribers, which basically it's just this client, since
+		//	// Remove all subscribers, which basically it's just c client, since
 		//	// each client has it's own topic tree.
-		//	err := this.topicsMgr.Unsubscribe(tb, nil)
+		//	err := c.topicsMgr.Unsubscribe(tb, nil)
 		//	if err != nil {
 		//		err2 = fmt.Errorf("%v\n%v", err2, err)
 		//	}
 		//
-		//	this.sess.RemoveTopic(string(tb))
+		//	c.sess.RemoveTopic(string(tb))
 		//}
 
 		if onComplete != nil {
@@ -410,23 +412,23 @@ func (this *service) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnC
 	}
 	println(onc)
 	return nil
-	//return this.sess.Unsuback.Wait(msg, onc)
+	//return c.sess.Unsuback.Wait(msg, onc)
 }
 
-func (this *service) ping(onComplete OnCompleteFunc) error {
+func (c *client) ping(onComplete OnCompleteFunc) error {
 	msg := message.NewPingreqMessage()
 
-	_, err := this.writeMessage(msg)
+	_, err := c.writeMessage(msg)
 	if err != nil {
-		return fmt.Errorf("(%s) Error sending %s message: %v", this.cid(), msg.Name(), err)
+		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)
 	}
 	return nil
-	//return this.sess.Pingack.Wait(msg, onComplete)
+	//return c.sess.Pingack.Wait(msg, onComplete)
 }
 
-func (this *service) isDone() bool {
+func (c *client) isDone() bool {
 	select {
-	case <-this.done:
+	case <-c.done:
 		return true
 
 	default:
@@ -435,7 +437,7 @@ func (this *service) isDone() bool {
 	return false
 }
 
-func (this *service) cid() string {
-	//, this.sess.ID()
-	return fmt.Sprintf("%d/%s", this.id)
+func (c *client) cid() string {
+	//, c.sess.ID()
+	return fmt.Sprintf("%d/%s", c.id)
 }
