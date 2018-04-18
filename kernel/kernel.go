@@ -47,6 +47,10 @@ func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 	return kernel.authenticator.Authenticate(msg)
 }
 
+func (kernel *Kernel) Publish(topic string,payload []byte) error {
+	return kernel.mq.Publish(topic, payload)
+}
+
 func (kernel *Kernel) WaitStop() {
 	stopChan := make(chan struct{}, 1)
 	signalChan := make(chan os.Signal, 1)

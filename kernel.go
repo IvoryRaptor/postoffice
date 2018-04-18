@@ -25,4 +25,5 @@ type IKernel interface {
 	AddChannel(c net.Conn) (err error)
 	GetMatrix(name string) (*Matrix, bool)
 	Authenticate(msg *message.ConnectMessage) *ChannelConfig
+	Publish(topic string,payload []byte) error
 }

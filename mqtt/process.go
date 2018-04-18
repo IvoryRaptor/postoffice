@@ -20,6 +20,7 @@ import (
 	"io"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"github.com/IvoryRaptor/postoffice/mq"
+	"strings"
 )
 
 var (
@@ -101,17 +102,32 @@ func (c *client) processIncoming(msg message.Message) error {
 
 	switch msg := msg.(type) {
 	case *message.PublishMessage:
-		mes := mq.MQMessage{
-			Host:c.kernel.GetHost(),
-			Actor:c.actor,
-			Resource:string(msg.Topic()),
-			Action:string(msg.Topic()),
-			Payload:msg.Payload(),
-		}
-		//[]byte, []int
-		data, _ := mes.Descriptor()
-		println(len(data))
+		sp:=strings.Split(string(msg.Topic()),"/")
 
+		if len(sp)<=4{
+			return nil
+		}
+		if sp[0]!= c.channel.ProductKey || sp[1]!=c.channel.DeviceName{
+			return nil
+		}
+		action:=sp[2] + "." +sp[3]
+		mes := mq.MQMessage{
+			Host:     c.kernel.GetHost(),
+			Actor:    c.channel.ProductKey + c.channel.DeviceName,
+			Resource: sp[2],
+			Action:   sp[3],
+			Payload:  msg.Payload(),
+		}
+		matrix,ok := c.kernel.GetMatrix(c.channel.ProductKey)
+		if ok {
+			payload, _ := mes.Descriptor()
+			topics, ok := matrix.Action.Load(action)
+			if ok {
+				for _, topic := range topics.([]string) {
+					c.kernel.Publish(topic, payload)
+				}
+			}
+		}
 		//println("Publish:" + c.actor + string(msg.Topic()))
 
 		// For PUBLISH message, we should figure out what QoS it is and process accordingly
@@ -130,7 +146,7 @@ func (c *client) processIncoming(msg message.Message) error {
 		//if err = c.sess.Pub2out.Ack(msg); err != nil {
 		//	break
 		//}
-		println("PubrecMessage", c.actor)
+		//println("PubrecMessage", c.actor)
 		resp := message.NewPubrelMessage()
 		resp.SetPacketId(msg.PacketId())
 		_, err = c.writeMessage(resp)

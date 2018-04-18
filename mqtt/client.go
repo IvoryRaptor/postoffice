@@ -44,15 +44,6 @@ var (
 )
 
 type client struct {
-	actor string
-	// The ID of this client, it's not related to the Client ID, just a number that's
-	// incremented for every new client.
-	id uint64
-
-	// Is this a client or server. It's set by either Connect (client) or
-	// HandleConnection (server).
-	client bool
-
 	// The number of seconds to keep the connection live if there's no data.
 	// If not set then default to 5 mins.
 	keepAlive int
@@ -107,10 +98,11 @@ type client struct {
 	intmp  []byte
 	outtmp []byte
 
-	subs   []interface{}
-	qoss   []byte
-	rmsgs  []*message.PublishMessage
-	kernel postoffice.IKernel
+	subs    []interface{}
+	qoss    []byte
+	rmsgs   []*message.PublishMessage
+	kernel  postoffice.IKernel
+	channel *postoffice.ChannelConfig
 }
 
 func (c *client) start() error {
@@ -129,28 +121,14 @@ func (c *client) start() error {
 	}
 
 	// If c is a server
-	if !c.client {
-		// Creat the onPublishFunc so it can be used for published messages
-		c.onpub = func(msg *message.PublishMessage) error {
-			if err := c.publish(msg, nil); err != nil {
-				glog.Errorf("client/onPublish: Error publishing message: %v", err)
-				return err
-			}
-
-			return nil
+	c.onpub = func(msg *message.PublishMessage) error {
+		if err := c.publish(msg, nil); err != nil {
+			glog.Errorf("client/onPublish: Error publishing message: %v", err)
+			return err
 		}
 
-		// If c is a recovered session, then add any topics it subscribed before
-		//topics, qoss, err := c.sess.Topics()
-		//if err != nil {
-		//	return err
-		//} else {
-		//	for i, t := range topics {
-		//		c.topicsMgr.Subscribe([]byte(t), qoss[i], &c.onpub)
-		//	}
-		//}
+		return nil
 	}
-
 	// Processor is responsible for reading messages out of the buffer and processing
 	// them accordingly.
 	c.wgStarted.Add(1)
@@ -439,5 +417,5 @@ func (c *client) isDone() bool {
 
 func (c *client) cid() string {
 	//, c.sess.ID()
-	return fmt.Sprintf("%d/%s", c.id)
+	return fmt.Sprintf("%d/%s", c.channel.ClientId)
 }

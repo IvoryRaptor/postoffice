@@ -7,7 +7,6 @@ import (
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"log"
-	"sync/atomic"
 )
 
 var (
@@ -60,18 +59,13 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 	}
 
 	svc := &client{
-		id:     atomic.AddUint64(&gsvcid, 1),
-		client: false,
-
 		keepAlive:      int(req.KeepAlive()),
 		connectTimeout: m.config.ConnectTimeout,
 		ackTimeout:     m.config.AckTimeout,
 		timeoutRetries: m.config.TimeoutRetries,
-		actor:          string(req.ClientId()),
 		conn:           conn,
 		kernel: m.kernel,
-		//sessMgr:   this.sessMgr,
-		//topicsMgr: this.topicsMgr,
+		channel:channel,
 	}
 	resp.SetReturnCode(message.ConnectionAccepted)
 
@@ -86,17 +80,5 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 		svc.stop()
 		return err
 	}
-	//
-	//svc.inStat.increment(int64(req.Len()))
-	//svc.outStat.increment(int64(resp.Len()))
-	//
-	//if err := svc.start(); err != nil {
-	//	svc.stop()
-	//	return nil, err
-	//}
-
-	//this.mu.Lock()
-	//this.svcs = append(this.svcs, svc)
-	//this.mu.Unlock()
 	return nil
 }
