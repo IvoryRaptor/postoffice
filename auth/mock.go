@@ -17,6 +17,11 @@ func (a *Mock) Start() error{
 	return nil
 }
 
-func (a *Mock) Authenticate(msg *message.ConnectMessage) error {
-	return nil
+func (a *Mock) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
+	config := postoffice.ChannelConfig{
+		ClientId:   string(msg.ClientId()),
+		DeviceName: string(msg.Username()),
+		ProductKey: string(msg.Password()),
+	}
+	return &config
 }

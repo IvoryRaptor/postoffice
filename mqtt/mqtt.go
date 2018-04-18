@@ -47,7 +47,8 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 	}
 
 	// Authenticate the user, if error, return error and exit
-	if err = m.kernel.Authenticate(req); err != nil {
+	channel := m.kernel.Authenticate(req)
+	if channel == nil {
 		resp.SetReturnCode(message.ErrBadUsernameOrPassword)
 		resp.SetSessionPresent(false)
 		writeMessage(conn, resp)

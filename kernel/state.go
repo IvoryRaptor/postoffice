@@ -71,7 +71,8 @@ func (kernel *Kernel)Config()error {
 
 	kernel.mqtt.Config(kernel, &kernel.config.MQTT)
 
-	kernel.authenticator = &auth.Mock{}
+	//kernel.authenticator = &auth.Mock{}
+	kernel.authenticator = &auth.Mongo{}
 	kernel.authenticator.Config(kernel, &kernel.config.Auth)
 	return nil
 }

@@ -43,7 +43,7 @@ func (kernel *Kernel) AddChannel(c net.Conn) (err error){
 	return nil
 }
 
-func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) error{
+func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig{
 	return kernel.authenticator.Authenticate(msg)
 }
 
