@@ -89,7 +89,7 @@ func (w *WebSocketSource) Config(kernel postoffice.IKernel, config Config,crt st
 	w.server = &http.Server{Addr: fmt.Sprintf(":%d", config.Port)}
 	w.ssl = config.SSL
 
-	http.HandleFunc("/mqtt_back", func(res http.ResponseWriter, req *http.Request) {
+	http.HandleFunc("/mqtt", func(res http.ResponseWriter, req *http.Request) {
 
 		//chDone := make(chan bool)
 		c, err := upgrader.Upgrade(res, req, nil)
