@@ -2,14 +2,11 @@ package postoffice
 
 import (
 	"net"
-	"sync"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 )
 
-type Matrix struct {
-	Name          string
-	Authorization string
-	Action        sync.Map
+type IMatrix interface {
+	GetTopics(action string) ([]string,bool)
 }
 
 
@@ -23,7 +20,7 @@ type IKernel interface {
 	GetHost() int32
 	Start() error
 	AddChannel(c net.Conn) (err error)
-	GetMatrix(name string) (*Matrix, bool)
+	GetMatrix(name string) (IMatrix, bool)
 	Authenticate(msg *message.ConnectMessage) *ChannelConfig
 	Publish(topic string,payload []byte) error
 }

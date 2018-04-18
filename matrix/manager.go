@@ -25,10 +25,10 @@ func (m *Manager) Config(kernel postoffice.IKernel, config *Config) error {
 	return nil
 }
 
-func (m *Manager) GetMatrix(name string) (*postoffice.Matrix, bool) {
+func (m *Manager) GetMatrix(name string) (postoffice.IMatrix, bool) {
 	res, ok := m.matrixMap.Load(name)
 	if ok{
-		return res.(*postoffice.Matrix), ok
+		return res.(*ZkMatrix), ok
 	}
 	return nil,ok
 }

@@ -36,10 +36,10 @@ func (a *OAuth) Authenticate(msg *message.ConnectMessage) error {
 	matrix := helper.Base36.Encode(data[0:15])
 	action := fmt.Sprintf("%x", data[16:])
 
-	m, ok := a.kernel.GetMatrix(matrix)
-	if !ok{
-		return ErrAuthFailure
-	}
+	//m, ok := a.kernel.GetMatrix(matrix)
+	//if !ok{
+	//	return ErrAuthFailure
+	//}
 
 	fmt.Println(matrix, action)
 
@@ -47,7 +47,7 @@ func (a *OAuth) Authenticate(msg *message.ConnectMessage) error {
 
 	req, err := http.NewRequest("GET", url, nil)
 
-	req.Header.Set("Authorization", m.Authorization)
+	//req.Header.Set("Authorization", m.Authorization)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}

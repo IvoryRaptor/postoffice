@@ -34,7 +34,7 @@ func (kernel *Kernel)GetHost() int32{
 	return kernel.host
 }
 
-func (kernel *Kernel) GetMatrix(name string) (*postoffice.Matrix, bool) {
+func (kernel *Kernel) GetMatrix(name string) (postoffice.IMatrix, bool) {
 	return kernel.matrixManger.GetMatrix(name)
 }
 
@@ -48,6 +48,7 @@ func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 }
 
 func (kernel *Kernel) Publish(topic string,payload []byte) error {
+	println(topic)
 	return kernel.mq.Publish(topic, payload)
 }
 

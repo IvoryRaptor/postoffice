@@ -6,20 +6,35 @@ import (
 	"fmt"
 	"sync"
 	"log"
-	"encoding/base64"
 )
 
 type ZkMatrix struct {
-	postoffice.Matrix
+	Name          string
+	Action        sync.Map
 	secretChan    chan bool
 	actionChan    chan bool
+}
+
+type ZkAction struct {
+	run       bool
+	Name      string
+	Topic    []string
+	actionChan chan bool
+}
+
+func (m *ZkMatrix)GetTopics(action string) ([]string,bool) {
+	r, ok := m.Action.Load(action)
+	if !ok {
+		return nil, ok
+	}
+	act := r.(*ZkAction)
+	return act.Topic, ok
 }
 
 func (m *ZkMatrix) WatchSecret(kernel postoffice.IKernel,conn *zk.Conn) {
 	go func() {
 		for ; ; {
 			secret, _, childCh, _ := conn.GetW(fmt.Sprintf("/postoffice/%s", m.Name))
-			m.Authorization = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s",m.Name,secret)))
 			log.Printf("matrix %s: %s", m.Name, secret)
 			select {
 			case ev := <-childCh:
@@ -45,14 +60,15 @@ func (m *ZkMatrix) WatchAction(kernel postoffice.IKernel,conn *zk.Conn) {
 					newAction.Store(actionName, action)
 					m.Action.Delete(actionName)
 				} else {
-					act := &Action{Name: actionName}
+					act := &ZkAction{}
+					act.Name = actionName
 					act.WatchTopic(kernel, m.Name, conn)
-					newAction.Store(actionName, action)
+					newAction.Store(actionName, act)
 				}
 				log.Printf("%s/%s", m.Name, actionName)
 			}
 			m.Action.Range(func(k, v interface{}) bool {
-				v.(*Action).StopWatch()
+				v.(*ZkAction).StopWatch()
 				return true
 			})
 			m.Action = newAction

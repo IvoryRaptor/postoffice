@@ -6,16 +6,16 @@ import (
 	"fmt"
 	"log"
 )
+//
+//type Action struct {
+//	run       bool
+//	Name      string
+//	Topic    []string
+//	actionChan chan bool
+//}
+//
 
-type Action struct {
-	run       bool
-	Name      string
-	Topic    []string
-	actionChan chan bool
-}
-
-
-func (a *Action) WatchTopic(kernel postoffice.IKernel, matrix string,conn *zk.Conn) {
+func (a *ZkAction) WatchTopic(kernel postoffice.IKernel, matrix string,conn *zk.Conn) {
 	a.run = true
 	go func() {
 		for ; ; {
@@ -35,6 +35,6 @@ func (a *Action) WatchTopic(kernel postoffice.IKernel, matrix string,conn *zk.Co
 	}()
 }
 
-func (a *Action) StopWatch() {
+func (a *ZkAction) StopWatch() {
 	a.actionChan <- true
 }
