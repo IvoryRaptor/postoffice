@@ -103,23 +103,23 @@ func (c *client) processIncoming(msg message.Message) error {
 	switch msg := msg.(type) {
 	case *message.PublishMessage:
 		sp:=strings.Split(string(msg.Topic()),"/")
-
-		if len(sp)<=4{
+		if len(sp)<5{
 			return nil
 		}
-		if sp[0]!= c.channel.ProductKey || sp[1]!=c.channel.DeviceName{
+		if sp[1]!= c.channel.ProductKey || sp[2]!=c.channel.DeviceName{
 			return nil
 		}
-		action:=sp[2] + "." +sp[3]
+		action:=sp[3] + "." +sp[4]
 		mes := mq.MQMessage{
 			Host:     c.kernel.GetHost(),
 			Actor:    c.channel.ProductKey + c.channel.DeviceName,
-			Resource: sp[2],
-			Action:   sp[3],
+			Resource: sp[3],
+			Action:   sp[4],
 			Payload:  msg.Payload(),
 		}
 		matrix,ok := c.kernel.GetMatrix(c.channel.ProductKey)
 		if ok {
+			println(mes.Actor)
 			payload, _ := mes.Descriptor()
 			topics, ok := matrix.Action.Load(action)
 			if ok {
@@ -127,6 +127,8 @@ func (c *client) processIncoming(msg message.Message) error {
 					c.kernel.Publish(topic, payload)
 				}
 			}
+		}else{
+			println("miss ")
 		}
 		//println("Publish:" + c.actor + string(msg.Topic()))
 

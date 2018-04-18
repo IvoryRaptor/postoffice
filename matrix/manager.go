@@ -27,7 +27,10 @@ func (m *Manager) Config(kernel postoffice.IKernel, config *Config) error {
 
 func (m *Manager) GetMatrix(name string) (*postoffice.Matrix, bool) {
 	res, ok := m.matrixMap.Load(name)
-	return res.(*postoffice.Matrix), ok
+	if ok{
+		return res.(*postoffice.Matrix), ok
+	}
+	return nil,ok
 }
 
 func (m *Manager) Start() error {
