@@ -85,7 +85,7 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 			case "hmacsha1":
 				h = hmac.New(sha1.New, []byte(data["secret"].(string)))
 			case "hmacmd5":
-				h = md5.New()
+				h = hmac.New(md5.New, []byte(data["secret"].(string)))
 			default:
 				println(v[1])
 			}
