@@ -34,8 +34,12 @@ func (kernel *Kernel)GetHost() int32{
 	return kernel.host
 }
 
-func (kernel *Kernel) GetMatrix(name string) (postoffice.IMatrix, bool) {
-	return kernel.matrixManger.GetMatrix(name)
+func (kernel *Kernel)GetTopics(matrix string, action string) ([]string, bool){
+	m,ok :=kernel.matrixManger.GetMatrix(matrix)
+	if !ok{
+		return nil,false
+	}
+	return m.GetTopics(action)
 }
 
 func (kernel *Kernel) AddChannel(c net.Conn) (err error){

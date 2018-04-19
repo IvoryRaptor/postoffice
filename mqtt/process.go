@@ -117,17 +117,15 @@ func (c *client) processIncoming(msg message.Message) error {
 			Action:   sp[4],
 			Payload:  msg.Payload(),
 		}
-		mat,ok := c.kernel.GetMatrix(c.channel.ProductKey)
+
+
+		topics,ok := c.kernel.GetTopics(c.channel.ProductKey,action)
 		if ok {
 			payload, _ := mes.Descriptor()
-			topics, ok := mat.GetTopics(action)
-			//println(ok)
-			if ok {
-				for _, topic := range topics {
-					c.kernel.Publish(topic, payload)
-				}
+			for _, topic := range topics {
+				c.kernel.Publish(topic, payload)
 			}
-		}else{
+		}else {
 			println("miss ")
 		}
 		//println("Publish:" + c.actor + string(msg.Topic()))

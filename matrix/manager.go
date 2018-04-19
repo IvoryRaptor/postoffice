@@ -17,6 +17,10 @@ type Manager struct {
 	matrixMap *sync.Map
 }
 
+type IMatrix interface {
+	GetTopics(action string) ([]string,bool)
+}
+
 func (m *Manager) Config(kernel postoffice.IKernel, config *Config) error {
 	m.kernel = kernel
 	m.oauth = config.OAuth
@@ -25,7 +29,7 @@ func (m *Manager) Config(kernel postoffice.IKernel, config *Config) error {
 	return nil
 }
 
-func (m *Manager) GetMatrix(name string) (postoffice.IMatrix, bool) {
+func (m *Manager) GetMatrix(name string) (IMatrix, bool) {
 	res, ok := m.matrixMap.Load(name)
 	if ok{
 		return res.(*ZkMatrix), ok

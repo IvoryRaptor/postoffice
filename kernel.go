@@ -5,11 +5,6 @@ import (
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 )
 
-type IMatrix interface {
-	GetTopics(action string) ([]string,bool)
-}
-
-
 type ChannelConfig struct{
 	ClientId string
 	DeviceName string
@@ -20,7 +15,7 @@ type IKernel interface {
 	GetHost() int32
 	Start() error
 	AddChannel(c net.Conn) (err error)
-	GetMatrix(name string) (IMatrix, bool)
+	GetTopics(matrix string, action string) ([]string, bool)
 	Authenticate(msg *message.ConnectMessage) *ChannelConfig
-	Publish(topic string,payload []byte) error
+	Publish(topic string, payload []byte) error
 }
