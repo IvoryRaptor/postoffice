@@ -22,4 +22,4 @@ Postoffice通过配置文件启动，
 当Angler部署到集群中，PostOffice将自动支持其消息转发。当Angler从集群中移除时，PostOffice将自动关闭该对用的消息支持。
 
 ## 3、配置文件格式
-
+[配置文件格式](https://github.com/IvoryRaptor/postoffice/tree/master/docs/CONFIG.md)
