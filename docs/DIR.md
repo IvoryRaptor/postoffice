@@ -115,14 +115,24 @@ kernel实现IKernel中的各接口函数，便于各模块调用kernel功能。
 
 ### 3.1、auth
 认证模块
+[Auth模块](https://github.com/IvoryRaptor/postoffice/tree/master/docs/AUTH.md)
+
 ### 3.2、matrix
 配置路径模块
+[Matrix模块](https://github.com/IvoryRaptor/postoffice/tree/master/docs/MATRIX.md)
+
 ### 3.3、mq
 对应kafka或其他消息队列模块
+[MQ模块](https://github.com/IvoryRaptor/postoffice/tree/master/docs/MQ.md)
+
 ### 3.4、mqtt
- MQTT队列配置
+MQTT队列配置
+[MQTT模块](https://github.com/IvoryRaptor/postoffice/tree/master/docs/MQTT.md)
+
 ### 3.5、source
 通道来源配置
+[Source模块](https://github.com/IvoryRaptor/postoffice/tree/master/docs/SOURCE.md)
 
 ### 3.6、ssl
 秘钥等内容配置
+[SSL模块](https://github.com/IvoryRaptor/postoffice/tree/master/docs/SSL.md)
