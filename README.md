@@ -22,7 +22,12 @@ Postoffice通过配置文件启动，
 当Angler部署到集群中，PostOffice将自动支持其消息转发。当Angler从集群中移除时，PostOffice将自动关闭该对用的消息支持。
 
 ## 3、配置文件格式
-所有系统启动参数依赖于配置文件，配置文件路径为config/postoffice/config.yaml
+所有系统启动参数依赖于配置文件
+
+配置文件路径为config/postoffice/config.yaml
+
 [配置文件格式](https://github.com/IvoryRaptor/postoffice/tree/master/docs/CONFIG.md)
 
 ## 4、模块及代码结构
+整个系统使用golang开发，各模块独立
+[目录及代码结构](https://github.com/IvoryRaptor/postoffice/tree/master/docs/DIR.md)
