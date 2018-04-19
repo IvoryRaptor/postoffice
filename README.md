@@ -1,12 +1,16 @@
 # Postoffice
 Postoffice项目介绍
 
->为物联网云平台提供长连接通道服务，目前项目仅支持MQTT协议。提供两种MQTT协议接入方式，分别为TCP、WebSocket。
+>为物联网云平台提供长连接通道服务，目前项目仅支持MQTT协议。提供两种MQTT协议接入方式，通道分别为TCP、WebSocket。
+接收到消息后推送给消息队列。由后端消息队列处理业务逻辑，并将结果发送回消息队列。Postoffice订阅自己的Topic，将消息
+再发送给前端设备。
 
-该项目采用golang设计，可同时配置多个通道，
+
 ## 1、功能概述：
+<img src="https://github.com/IvoryRaptor/InvoryRaptor/blob/master/resource/postoffice.jpg" alt="postoffice" title="postoffice" width="406" height="222" />
 
-Postoffice通过配置文件启动，
+该项目采用golang设计。Postoffice通过配置文件启动，向外提供MQTT服务，可同时配置多个通道。
+
 
 ## 2、支持功能
 ### 2.1、多通道
