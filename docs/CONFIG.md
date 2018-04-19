@@ -38,9 +38,11 @@
 连接存储使用的url地址。
 
 ## 2、matrix 服务发现：
+当Angler部署到集群中，PostOffice将自动支持其消息转发。当Angler从集群中移除时，PostOffice将自动关闭该对用的消息支持。
 ### 2.1 zookeeper配置
 系统中将应用信息配置在zookeeper中，此处配置zookeeper主机地址及端口号。
 （由于系统默认将Zookeeper安装在Kubernetes的default namespace下，因此使用zookeeper.default）
+[Zookeeper中Postoffice转发规则结构](https://github.com/IvoryRaptor/InvoryRaptor/blob/master/zookeeper/POSTOFFICE.md)
 
 ## 3、mq 消息队列
 消息转发的目标消息队列
