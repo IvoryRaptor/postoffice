@@ -1,5 +1,6 @@
 auth:
-  url: https://localhost/
+  type: mongodb
+  url: mongodb://192.168.41.170:30707
 matrix:
   zookeeper:
     host: zookeeper.default

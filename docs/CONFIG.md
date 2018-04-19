@@ -1,21 +1,31 @@
-配置文件与目录对应关系：
-系统中每个模块对应一个目录
-每个目录中的config.go文件，存储该模块使用的配置格式
-整体配置文件格式由，kernel/config.go文件进行串联
+# Postoffice 配置文件格式
+> 所有系统启动参数依赖于配置文件，配置文件采用YAML格式，路径为config/postoffice/config.yaml
 
-目前包含以下几个模块：
-auth：
-    认证模块
+`
+auth:
+  type: mongodb
+  url: mongodb://192.168.41.170:30707
 matrix:
-    配置路径模块
+  zookeeper:
+    host: zookeeper.default
+    port: 2181
 mq:
-    对应kafka或其他消息队列模块
+  type: kafka
+  host: kafka.default
+  port: 9092
 mqtt:
-    MQTT队列配置
+  keepAlive: 300
+  connectTimeout: 2
+  ackTimeout: 20
+  timeoutRetries: 3
 source:
-    通道来源配置
+  - type: tcp
+    ssl: false
+    port: 1883
+  - type: websocket
+    ssl: false
+    port: 8080
 ssl:
-    秘钥等内容配置
-
-所有配置文件放置在目录config下，目的是方便部署在kubernetes时，使用config-map替换其中内容
-文件名为：/postoffice/config.yaml
+  crt: ./cert/postoffice.crt
+  key: ./cert/postoffice.key
+`
