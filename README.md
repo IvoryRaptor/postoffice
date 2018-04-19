@@ -11,6 +11,7 @@ Postoffice项目介绍
 
 该项目采用golang设计。Postoffice通过配置文件启动，向外提供MQTT服务，可同时配置多个通道。
 
+[MQTT消息到MQ的转发规则](https://github.com/IvoryRaptor/InvoryRaptor/blob/master/mq/TOPIC.md)
 
 ## 2、支持功能
 ### 2.1、多通道
@@ -32,6 +33,10 @@ Postoffice项目介绍
 
 [配置文件格式](https://github.com/IvoryRaptor/postoffice/tree/master/docs/CONFIG.md)
 
+## 4、限制
+
+
 ## 4、模块及代码结构
 整个系统使用golang开发，各模块独立
 [目录及代码结构](https://github.com/IvoryRaptor/postoffice/tree/master/docs/DIR.md)
+
