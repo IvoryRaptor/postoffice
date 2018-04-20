@@ -117,8 +117,6 @@ func (c *client) processIncoming(msg message.Message) error {
 			Action:   sp[4],
 			Payload:  msg.Payload(),
 		}
-
-
 		topics,ok := c.kernel.GetTopics(c.channel.ProductKey,action)
 		if ok {
 			payload, _ := mes.Descriptor()
@@ -128,14 +126,6 @@ func (c *client) processIncoming(msg message.Message) error {
 		}else {
 			println("miss ")
 		}
-		//println("Publish:" + c.actor + string(msg.Topic()))
-
-		// For PUBLISH message, we should figure out what QoS it is and process accordingly
-		// If QoS == 0, we should just take the next step, no ack required
-		// If QoS == 1, we should send back PUBACK, then take the next step
-		// If QoS == 2, we need to put it in the ack queue, send back PUBREC
-		err = c.processPublish(msg)
-
 	case *message.PubackMessage:
 		// For PUBACK message, it means QoS 1, we should send to ack queue
 		//c.sess.Pub1ack.Ack(msg)
@@ -213,117 +203,6 @@ func (c *client) processIncoming(msg message.Message) error {
 
 	return err
 }
-//
-//func (this *client) processAcked(ackq *sessions.Ackqueue) {
-//	for _, ackmsg := range ackq.Acked() {
-//		// Let's get the messages from the saved message byte slices.
-//		msg, err := ackmsg.Mtype.New()
-//		if err != nil {
-//			glog.Errorf("process/processAcked: Unable to creating new %s message: %v", ackmsg.Mtype, err)
-//			continue
-//		}
-//
-//		if _, err := msg.Decode(ackmsg.Msgbuf); err != nil {
-//			glog.Errorf("process/processAcked: Unable to decode %s message: %v", ackmsg.Mtype, err)
-//			continue
-//		}
-//
-//		ack, err := ackmsg.State.New()
-//		if err != nil {
-//			glog.Errorf("process/processAcked: Unable to creating new %s message: %v", ackmsg.State, err)
-//			continue
-//		}
-//
-//		if _, err := ack.Decode(ackmsg.Ackbuf); err != nil {
-//			glog.Errorf("process/processAcked: Unable to decode %s message: %v", ackmsg.State, err)
-//			continue
-//		}
-//
-//		//glog.Debugf("(%s) Processing acked message: %v", this.cid(), ack)
-//
-//		// - PUBACK if it's QoS 1 message. This is on the client side.
-//		// - PUBREL if it's QoS 2 message. This is on the server side.
-//		// - PUBCOMP if it's QoS 2 message. This is on the client side.
-//		// - SUBACK if it's a subscribe message. This is on the client side.
-//		// - UNSUBACK if it's a unsubscribe message. This is on the client side.
-//		switch ackmsg.State {
-//		case message.PUBREL:
-//			// If ack is PUBREL, that means the QoS 2 message sent by a remote client is
-//			// releassed, so let's publish it to other subscribers.
-//			if err = this.onPublish(msg.(*message.PublishMessage)); err != nil {
-//				glog.Errorf("(%s) Error processing ack'ed %s message: %v", this.cid(), ackmsg.Mtype, err)
-//			}
-//
-//		case message.PUBACK, message.PUBCOMP, message.SUBACK, message.UNSUBACK, message.PINGRESP:
-//			glog.Debugf("process/processAcked: %s", ack)
-//			// If ack is PUBACK, that means the QoS 1 message sent by this client got
-//			// ack'ed. There's nothing to do other than calling onComplete() below.
-//
-//			// If ack is PUBCOMP, that means the QoS 2 message sent by this client got
-//			// ack'ed. There's nothing to do other than calling onComplete() below.
-//
-//			// If ack is SUBACK, that means the SUBSCRIBE message sent by this client
-//			// got ack'ed. There's nothing to do other than calling onComplete() below.
-//
-//			// If ack is UNSUBACK, that means the SUBSCRIBE message sent by this client
-//			// got ack'ed. There's nothing to do other than calling onComplete() below.
-//
-//			// If ack is PINGRESP, that means the PINGREQ message sent by this client
-//			// got ack'ed. There's nothing to do other than calling onComplete() below.
-//
-//			err = nil
-//
-//		default:
-//			glog.Errorf("(%s) Invalid ack message type %s.", this.cid(), ackmsg.State)
-//			continue
-//		}
-//
-//		// Call the registered onComplete function
-//		if ackmsg.OnComplete != nil {
-//			onComplete, ok := ackmsg.OnComplete.(OnCompleteFunc)
-//			if !ok {
-//				glog.Errorf("process/processAcked: Error type asserting onComplete function: %v", reflect.TypeOf(ackmsg.OnComplete))
-//			} else if onComplete != nil {
-//				if err := onComplete(msg, ack, nil); err != nil {
-//					glog.Errorf("process/processAcked: Error running onComplete(): %v", err)
-//				}
-//			}
-//		}
-//	}
-//}
-
-// For PUBLISH message, we should figure out what QoS it is and process accordingly
-// If QoS == 0, we should just take the next step, no ack required
-// If QoS == 1, we should send back PUBACK, then take the next step
-// If QoS == 2, we need to put it in the ack queue, send back PUBREC
-func (c *client) processPublish(msg *message.PublishMessage) error {
-	switch msg.QoS() {
-	case message.QosExactlyOnce:
-		//c.sess.Pub2in.Wait(msg, nil)
-
-		resp := message.NewPubrecMessage()
-		resp.SetPacketId(msg.PacketId())
-
-		_, err := c.writeMessage(resp)
-		return err
-
-	case message.QosAtLeastOnce:
-		resp := message.NewPubackMessage()
-		resp.SetPacketId(msg.PacketId())
-
-		if _, err := c.writeMessage(resp); err != nil {
-			return err
-		}
-
-		return c.onPublish(msg)
-
-	case message.QosAtMostOnce:
-		return c.onPublish(msg)
-	}
-
-	return fmt.Errorf("(%s) invalid message QoS %d.", c.cid(), msg.QoS())
-}
-
 // For SUBSCRIBE message, we should add subscriber, then send back SUBACK
 func (c *client) processSubscribe(msg *message.SubscribeMessage) error {
 	resp := message.NewSubackMessage()

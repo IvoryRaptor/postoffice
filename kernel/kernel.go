@@ -54,7 +54,6 @@ func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 }
 
 func (kernel *Kernel) Publish(topic string,payload []byte) error {
-	println(topic)
 	return kernel.mq.Publish(topic, payload)
 }
 
