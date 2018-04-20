@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"github.com/gorilla/websocket"
 	"log"
-	"io"
 	"github.com/IvoryRaptor/postoffice"
 	"fmt"
 	"time"
 	"net"
+	"bytes"
 )
 
 type WebSocketSource struct {
@@ -20,7 +20,7 @@ type WebSocketSource struct {
 }
 
 type WebSocketConn struct {
-	readBuffer [1024]byte
+	readBuffer bytes.Buffer
 	readCount  int
 	conn       *websocket.Conn
 }
@@ -32,7 +32,7 @@ func (w *WebSocketConn)Write(b []byte) (n int, err error) {
 }
 
 func (w *WebSocketConn) Read(b []byte) (n int, err error) {
-	n = copy(b, w.readBuffer[:w.readCount])
+	n, err = w.readBuffer.Read(b)
 	if n < len(b) {
 		t, p, e := w.conn.ReadMessage()
 		//只有二进制可用
@@ -42,11 +42,9 @@ func (w *WebSocketConn) Read(b []byte) (n int, err error) {
 		}
 		c := copy(b[n:], p)
 		if c < len(p) {
-			c = copy(w.readBuffer[:], p[c:])
-			w.readCount = c
-			n += c
+			w.readBuffer.Write(p[c:])
 		}
-
+		n = n + c
 		return n, e
 	}
 	return n, nil
@@ -97,19 +95,7 @@ func (w *WebSocketSource) Config(kernel postoffice.IKernel, config Config,crt st
 			log.Print("upgrade:", err)
 			return
 		}
-		//client, err := net.Dial("tcp", "127.0.0.1:1883")
-		//if err != nil {
-		//	log.Print("upgrade:", err)
-		//	return
-		//}
 		w.kernel.AddChannel(&WebSocketConn{conn: c})
-		//c.WriteMessage(2, nil)
-		//defer client.Close()
-		//go func() {
-		//	ioToWS(client, c)
-		//	chDone <- true
-		//}()
-		//wsToIO(c, client)
 	})
 	return nil
 }
@@ -131,37 +117,4 @@ func (w *WebSocketSource) Start() error {
 
 func (w *WebSocketSource) Stop(){
 	w.server.Shutdown(nil)
-}
-
-func ioToWS(src io.Reader, dst *websocket.Conn) (int, error) {
-	buffer := make([]byte, 2048)
-	count := 0
-	for {
-		n, err := src.Read(buffer)
-		if err != nil || n < 1 {
-			return count, err
-		}
-		count += n
-		dst.WriteMessage(2, buffer[0:n])
-		if err != nil {
-			return count, err
-		}
-	}
-	return count, nil
-}
-func wsToIO(src *websocket.Conn, dst io.Writer) (int, error) {
-	count := 0
-	for {
-		_, buffer, err := src.ReadMessage()
-		if err != nil {
-			return count, err
-		}
-		n := len(buffer)
-		count += n
-		i, err := dst.Write(buffer)
-		if err != nil || i < 1 {
-			return count, err
-		}
-	}
-	return count, nil
 }
