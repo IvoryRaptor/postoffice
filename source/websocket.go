@@ -21,7 +21,6 @@ type WebSocketSource struct {
 
 type WebSocketConn struct {
 	readBuffer bytes.Buffer
-	readCount  int
 	conn       *websocket.Conn
 }
 
@@ -79,7 +78,7 @@ func (w *WebSocketSource) Config(kernel postoffice.IKernel, config Config,crt st
 	w.crt = crt
 	w.kernel = kernel
 	var upgrader = websocket.Upgrader{
-		Subprotocols: []string{"mqttv3.1", "mqtt_back", "mqttv3.1.1"},
+		Subprotocols: []string{"mqttv3.1", "mqtt", "mqttv3.1.1"},
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},

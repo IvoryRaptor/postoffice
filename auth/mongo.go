@@ -46,6 +46,9 @@ func (a *Mongo) Start() error{
 
 func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
 	sp := strings.Split(string(msg.Username()), "&")
+	if len(sp) != 2 {
+		return nil
+	}
 	config := postoffice.ChannelConfig{
 		DeviceName: sp[0],
 		ProductKey: sp[1],
@@ -100,7 +103,8 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 		h.Write([]byte(key))
 		h.Write([]byte(params[key]))
 	}
-	if string(msg.Password()) != fmt.Sprintf("%X", h.Sum(nil)) {
+
+	if strings.EqualFold(string(msg.Password()),fmt.Sprintf("%X", h.Sum(nil))) {
 		return nil
 	}
 	return &config

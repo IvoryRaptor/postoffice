@@ -2,7 +2,6 @@ package mqtt
 
 import (
 	"net"
-	"time"
 	"errors"
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
@@ -31,7 +30,6 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 			conn.Close()
 		}
 	}()
-	conn.SetReadDeadline(time.Now().Add(time.Second * time.Duration(m.config.ConnectTimeout)))
 	resp := message.NewConnackMessage()
 	req, err := getConnectMessage(conn)
 	if err != nil {
@@ -44,7 +42,6 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 		}
 		return err
 	}
-
 	// Authenticate the user, if error, return error and exit
 	channel := m.kernel.Authenticate(req)
 	if channel == nil {
