@@ -11,6 +11,10 @@ type ChannelConfig struct{
 	ProductKey string
 }
 
+type IClient interface {
+	Publish(msg *message.PublishMessage) error
+}
+
 type IKernel interface {
 	GetHost() int32
 	Start() error
@@ -18,6 +22,6 @@ type IKernel interface {
 	GetTopics(matrix string, action string) ([]string, bool)
 	Authenticate(msg *message.ConnectMessage) *ChannelConfig
 	Publish(topic string, payload []byte) error
-	AddClient(clientId string, client interface{})
+	AddClient(clientId string, client IClient)
 	Arrive(msg *MQMessage)
 }

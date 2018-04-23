@@ -89,7 +89,7 @@ type Client struct {
 	//
 	// For the server, when this method is called, it means there's a message that
 	// should be published to the Client on the other end of this connection. So we
-	// will call publish() to send the message.
+	// will call Publish() to send the message.
 	onpub OnPublishFunc
 
 	inStat  stat
@@ -105,12 +105,8 @@ type Client struct {
 	channel *postoffice.ChannelConfig
 }
 
-func (c *Client) GetClientId() string {
-	return c.channel.ClientId
-}
-
-func (c *Client) SendMessage(msg *message.PublishMessage) {
-	println(msg)
+func (c *Client) GetChannel() *postoffice.ChannelConfig {
+	return c.channel
 }
 
 func (c *Client) start() error {
@@ -130,7 +126,7 @@ func (c *Client) start() error {
 
 	// If c is a server
 	c.onpub = func(msg *message.PublishMessage) error {
-		if err := c.publish(msg, nil); err != nil {
+		if err := c.Publish(msg); err != nil {
 			glog.Errorf("Client/onPublish: Error publishing message: %v", err)
 			return err
 		}
@@ -231,8 +227,8 @@ func (c *Client) stop() {
 	c.out = nil
 }
 
-func (c *Client) publish(msg *message.PublishMessage, onComplete OnCompleteFunc) error {
-	//glog.Debugf("Client/publish: Publishing %s", msg)
+func (c *Client) Publish(msg *message.PublishMessage) error {
+	//glog.Debugf("Client/Publish: Publishing %s", msg)
 	_, err := c.writeMessage(msg)
 	if err != nil {
 		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)
@@ -240,9 +236,9 @@ func (c *Client) publish(msg *message.PublishMessage, onComplete OnCompleteFunc)
 
 	switch msg.QoS() {
 	case message.QosAtMostOnce:
-		if onComplete != nil {
-			return onComplete(msg, nil, nil)
-		}
+		//if onComplete != nil {
+		//	return onComplete(msg, nil, nil)
+		//}
 
 		return nil
 

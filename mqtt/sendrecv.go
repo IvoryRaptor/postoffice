@@ -277,7 +277,7 @@ func (c *Client) writeMessage(msg message.Message) (int, error) {
 	// do exactly the same thing.
 	//
 	// Not an ideal fix though. If possible we should remove mutex and be lockfree.
-	// Mainly because when there's a large number of goroutines that want to publish
+	// Mainly because when there's a large number of goroutines that want to Publish
 	// to c Client, then they will all block. However, c will do for now.
 	//
 	// FIXME: Try to find a better way than a mutex...if possible.

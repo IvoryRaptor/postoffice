@@ -23,7 +23,6 @@ import (
 // to transport an Application Message.
 type PublishMessage struct {
 	header
-
 	topic   []byte
 	payload []byte
 }

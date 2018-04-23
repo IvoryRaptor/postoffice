@@ -14,6 +14,7 @@ import (
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"time"
 	"sync"
+	"fmt"
 )
 
 type Kernel struct {
@@ -69,14 +70,24 @@ func (kernel *Kernel) WaitStop() {
 	os.Exit(0)
 }
 
-func (kernel *Kernel)AddClient(clientId string, client interface{}) {
+func (kernel *Kernel)AddClient(clientId string, client postoffice.IClient) {
 	kernel.clients.Store(clientId, client)
 }
 
-func (kernel *Kernel)Arrive(msg *postoffice.MQMessage)  {
-	val,ok:=kernel.clients.Load(msg.Actor)
-	if ok{
+func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
+	val, ok := kernel.clients.Load(msg.Actor)
+	if ok {
 		client := val.(*mqtt.Client)
-		println(client)
+		channel := client.GetChannel()
+		pus := message.NewPublishMessage()
+		topic := fmt.Sprintf(
+			"%s/%s/%s/%s",
+			channel.ProductKey,
+			channel.DeviceName,
+			msg.Resource,
+			msg.Action)
+		pus.SetTopic([]byte(topic))
+		pus.SetPayload(msg.Payload)
+		client.Publish(pus)
 	}
 }

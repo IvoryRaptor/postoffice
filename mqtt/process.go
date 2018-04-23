@@ -242,7 +242,7 @@ func (c *Client) processSubscribe(msg *message.SubscribeMessage) error {
 	}
 
 	for _, rm := range c.rmsgs {
-		if err := c.publish(rm, nil); err != nil {
+		if err := c.Publish(rm); err != nil {
 			//glog.Errorf("Client/processSubscribe: Error publishing retained message: %v", err)
 			return err
 		}
@@ -268,7 +268,7 @@ func (c *Client) processUnsubscribe(msg *message.UnsubscribeMessage) error {
 }
 
 // onPublish() is called when the server receives a PUBLISH message AND have completed
-// the ack cycle. This method will get the list of subscribers based on the publish
+// the ack cycle. This method will get the list of subscribers based on the Publish
 // topic, and publishes the message to the list of subscribers.
 func (c *Client) onPublish(msg *message.PublishMessage) error {
 	if msg.Retain() {
