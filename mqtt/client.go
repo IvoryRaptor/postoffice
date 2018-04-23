@@ -109,6 +109,10 @@ func (c *Client) GetClientId() string {
 	return c.channel.ClientId
 }
 
+func (c *Client) SendMessage(msg *message.PublishMessage) {
+	println(msg)
+}
+
 func (c *Client) start() error {
 	var err error
 

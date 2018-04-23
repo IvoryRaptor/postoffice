@@ -73,6 +73,10 @@ func (kernel *Kernel)AddClient(clientId string, client interface{}) {
 	kernel.clients.Store(clientId, client)
 }
 
-func (kernel *Kernel)Arrive(msg postoffice.MQMessage)  {
-
+func (kernel *Kernel)Arrive(msg *postoffice.MQMessage)  {
+	val,ok:=kernel.clients.Load(msg.Actor)
+	if ok{
+		client := val.(*mqtt.Client)
+		println(client)
+	}
 }

@@ -19,5 +19,5 @@ type IKernel interface {
 	Authenticate(msg *message.ConnectMessage) *ChannelConfig
 	Publish(topic string, payload []byte) error
 	AddClient(clientId string, client interface{})
-	Arrive(msg MQMessage)
+	Arrive(msg *MQMessage)
 }
