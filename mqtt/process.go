@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"io"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"github.com/IvoryRaptor/postoffice/mq"
 	"strings"
 	"github.com/golang/protobuf/proto"
+	"github.com/IvoryRaptor/postoffice"
 )
 
 var (
@@ -29,7 +29,7 @@ var (
 )
 
 // processor() reads messages from the incoming buffer and processes them
-func (c *client) processor() {
+func (c *Client) processor() {
 	defer func() {
 		// Let's recover from panic
 		if r := recover(); r != nil {
@@ -98,7 +98,7 @@ func (c *client) processor() {
 	}
 }
 
-func (c *client) processIncoming(msg message.Message) error {
+func (c *Client) processIncoming(msg message.Message) error {
 	var err error = nil
 
 	switch msg := msg.(type) {
@@ -111,7 +111,7 @@ func (c *client) processIncoming(msg message.Message) error {
 			return nil
 		}
 		action:=sp[3] + "." +sp[4]
-		mes := mq.MQMessage{
+		mes := postoffice.MQMessage{
 			Host:     c.kernel.GetHost(),
 			Actor:    c.channel.ClientId,
 			Resource: sp[3],
@@ -205,7 +205,7 @@ func (c *client) processIncoming(msg message.Message) error {
 	return err
 }
 // For SUBSCRIBE message, we should add subscriber, then send back SUBACK
-func (c *client) processSubscribe(msg *message.SubscribeMessage) error {
+func (c *Client) processSubscribe(msg *message.SubscribeMessage) error {
 	resp := message.NewSubackMessage()
 	resp.SetPacketId(msg.PacketId())
 
@@ -243,7 +243,7 @@ func (c *client) processSubscribe(msg *message.SubscribeMessage) error {
 
 	for _, rm := range c.rmsgs {
 		if err := c.publish(rm, nil); err != nil {
-			//glog.Errorf("client/processSubscribe: Error publishing retained message: %v", err)
+			//glog.Errorf("Client/processSubscribe: Error publishing retained message: %v", err)
 			return err
 		}
 	}
@@ -252,7 +252,7 @@ func (c *client) processSubscribe(msg *message.SubscribeMessage) error {
 }
 
 // For UNSUBSCRIBE message, we should remove the subscriber, and send back UNSUBACK
-func (c *client) processUnsubscribe(msg *message.UnsubscribeMessage) error {
+func (c *Client) processUnsubscribe(msg *message.UnsubscribeMessage) error {
 	//topics := msg.Topics()
 
 	//for _, t := range topics {
@@ -270,7 +270,7 @@ func (c *client) processUnsubscribe(msg *message.UnsubscribeMessage) error {
 // onPublish() is called when the server receives a PUBLISH message AND have completed
 // the ack cycle. This method will get the list of subscribers based on the publish
 // topic, and publishes the message to the list of subscribers.
-func (c *client) onPublish(msg *message.PublishMessage) error {
+func (c *Client) onPublish(msg *message.PublishMessage) error {
 	if msg.Retain() {
 		//if err := c.topicsMgr.Retain(msg); err != nil {
 		//	glog.Errorf("(%s) Error retaining message: %v", c.cid(), err)

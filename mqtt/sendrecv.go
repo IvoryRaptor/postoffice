@@ -43,7 +43,7 @@ func (r timeoutReader) Read(b []byte) (int, error) {
 }
 
 // receiver() reads data from the network, and writes the data into the incoming buffer
-func (c *client) receiver() {
+func (c *Client) receiver() {
 	defer func() {
 		// Let's recover from panic
 		if r := recover(); r != nil {
@@ -88,7 +88,7 @@ func (c *client) receiver() {
 }
 
 // sender() writes data from the outgoing buffer to the network
-func (c *client) sender() {
+func (c *Client) sender() {
 	defer func() {
 		// Let's recover from panic
 		if r := recover(); r != nil {
@@ -127,7 +127,7 @@ func (c *client) sender() {
 
 // peekMessageSize() reads, but not commits, enough bytes to determine the size of
 // the next message and returns the type and size.
-func (c *client) peekMessageSize() (message.MessageType, int, error) {
+func (c *Client) peekMessageSize() (message.MessageType, int, error) {
 	var (
 		b   []byte
 		err error
@@ -179,7 +179,7 @@ func (c *client) peekMessageSize() (message.MessageType, int, error) {
 
 // peekMessage() reads a message from the buffer, but the bytes are NOT committed.
 // This means the buffer still thinks the bytes are not read yet.
-func (c *client) peekMessage(mtype message.MessageType, total int) (message.Message, int, error) {
+func (c *Client) peekMessage(mtype message.MessageType, total int) (message.Message, int, error) {
 	var (
 		b    []byte
 		err  error
@@ -216,7 +216,7 @@ func (c *client) peekMessage(mtype message.MessageType, total int) (message.Mess
 
 // readMessage() reads and copies a message from the buffer. The buffer bytes are
 // committed as a result of the read.
-func (c *client) readMessage(mtype message.MessageType, total int) (message.Message, int, error) {
+func (c *Client) readMessage(mtype message.MessageType, total int) (message.Message, int, error) {
 	var (
 		b   []byte
 		err error
@@ -256,7 +256,7 @@ func (c *client) readMessage(mtype message.MessageType, total int) (message.Mess
 }
 
 // writeMessage() writes a message to the outgoing buffer
-func (c *client) writeMessage(msg message.Message) (int, error) {
+func (c *Client) writeMessage(msg message.Message) (int, error) {
 	var (
 		l    int = msg.Len()
 		m, n int
@@ -272,13 +272,13 @@ func (c *client) writeMessage(msg message.Message) (int, error) {
 	// This is to serialize writes to the underlying buffer. Multiple goroutines could
 	// potentially get here because of calling Publish() or Subscribe() or other
 	// functions that will send messages. For example, if a message is received in
-	// another connetion, and the message needs to be published to c client, then
-	// the Publish() function is called, and at the same time, another client could
+	// another connetion, and the message needs to be published to c Client, then
+	// the Publish() function is called, and at the same time, another Client could
 	// do exactly the same thing.
 	//
 	// Not an ideal fix though. If possible we should remove mutex and be lockfree.
 	// Mainly because when there's a large number of goroutines that want to publish
-	// to c client, then they will all block. However, c will do for now.
+	// to c Client, then they will all block. However, c will do for now.
 	//
 	// FIXME: Try to find a better way than a mutex...if possible.
 	c.wmu.Lock()

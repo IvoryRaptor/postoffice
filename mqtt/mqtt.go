@@ -9,10 +9,10 @@ import (
 )
 
 var (
-	ErrInvalidConnectionType  error = errors.New("client: Invalid connection type")
-	ErrInvalidSubscriber      error = errors.New("client: Invalid subscriber")
-	ErrBufferNotReady         error = errors.New("client: buffer is not ready")
-	ErrBufferInsufficientData error = errors.New("client: buffer has insufficient data.")
+	ErrInvalidConnectionType  error = errors.New("Client: Invalid connection type")
+	ErrInvalidSubscriber      error = errors.New("Client: Invalid subscriber")
+	ErrBufferNotReady         error = errors.New("Client: buffer is not ready")
+	ErrBufferInsufficientData error = errors.New("Client: buffer has insufficient data.")
 )
 
 const (
@@ -24,7 +24,7 @@ type MQTT struct {
 	config * Config
 }
 
-func (m * MQTT)AddChannel(conn net.Conn) (err error){
+func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 	defer func() {
 		if err != nil {
 			conn.Close()
@@ -33,9 +33,9 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 	resp := message.NewConnackMessage()
 	req, err := getConnectMessage(conn)
 	if err != nil {
-		log.Printf("request connection %s",err.Error())
+		log.Printf("request connection %s", err.Error())
 		if cerr, ok := err.(message.ConnackCode); ok {
-			log.Printf("request connection %s",err)
+			log.Printf("request connection %s", err)
 			resp.SetReturnCode(cerr)
 			resp.SetSessionPresent(false)
 			writeMessage(conn, resp)
@@ -55,14 +55,14 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 		req.SetKeepAlive(minKeepAlive)
 	}
 
-	svc := &client{
+	svc := &Client{
 		keepAlive:      int(req.KeepAlive()),
 		connectTimeout: m.config.ConnectTimeout,
 		ackTimeout:     m.config.AckTimeout,
 		timeoutRetries: m.config.TimeoutRetries,
 		conn:           conn,
-		kernel: m.kernel,
-		channel:channel,
+		kernel:         m.kernel,
+		channel:        channel,
 	}
 	resp.SetReturnCode(message.ConnectionAccepted)
 
@@ -73,6 +73,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error){
 	svc.inStat.increment(int64(req.Len()))
 	svc.outStat.increment(int64(resp.Len()))
 
+	m.kernel.AddClient(channel.ClientId, svc)
 	if err := svc.start(); err != nil {
 		svc.stop()
 		return err

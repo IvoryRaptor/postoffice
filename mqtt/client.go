@@ -43,7 +43,7 @@ var (
 	gsvcid uint64 = 0
 )
 
-type client struct {
+type Client struct {
 	// The number of seconds to keep the connection live if there's no data.
 	// If not set then default to 5 mins.
 	keepAlive int
@@ -60,7 +60,7 @@ type client struct {
 	// If no set then default to 3 retries.
 	timeoutRetries int
 
-	// Network connection for this client
+	// Network connection for this Client
 	conn io.Closer
 
 	// Wait for the various goroutines to finish starting and stopping
@@ -70,10 +70,10 @@ type client struct {
 	// writeMessage mutex - serializes writes to the outgoing buffer.
 	wmu sync.Mutex
 
-	// Whether this is client is closed or not.
+	// Whether this is Client is closed or not.
 	closed int64
 
-	// Quit signal for determining when this client should end. If channel is closed,
+	// Quit signal for determining when this Client should end. If channel is closed,
 	// then exit.
 	done chan struct{}
 
@@ -88,7 +88,7 @@ type client struct {
 	// PUBLISH message, it will call the subscriber, which is this method.
 	//
 	// For the server, when this method is called, it means there's a message that
-	// should be published to the client on the other end of this connection. So we
+	// should be published to the Client on the other end of this connection. So we
 	// will call publish() to send the message.
 	onpub OnPublishFunc
 
@@ -105,7 +105,11 @@ type client struct {
 	channel *postoffice.ChannelConfig
 }
 
-func (c *client) start() error {
+func (c *Client) GetClientId() string {
+	return c.channel.ClientId
+}
+
+func (c *Client) start() error {
 	var err error
 
 	// Create the incoming ring buffer
@@ -123,7 +127,7 @@ func (c *client) start() error {
 	// If c is a server
 	c.onpub = func(msg *message.PublishMessage) error {
 		if err := c.publish(msg, nil); err != nil {
-			glog.Errorf("client/onPublish: Error publishing message: %v", err)
+			glog.Errorf("Client/onPublish: Error publishing message: %v", err)
 			return err
 		}
 
@@ -154,7 +158,7 @@ func (c *client) start() error {
 
 // FIXME: The order of closing here causes panic sometimes. For example, if receiver
 // calls this, and closes the buffers, somehow it causes buffer.go:476 to panid.
-func (c *client) stop() {
+func (c *Client) stop() {
 	defer func() {
 		// Let's recover from panic
 		if r := recover(); r != nil {
@@ -188,8 +192,8 @@ func (c *client) stop() {
 	glog.Debugf("(%s) Received %d bytes in %d messages.", c.cid(), c.inStat.bytes, c.inStat.msgs)
 	glog.Debugf("(%s) Sent %d bytes in %d messages.", c.cid(), c.outStat.bytes, c.outStat.msgs)
 
-	// Unsubscribe from all the topics for c client, only for the server side though
-	//if !c.client && c.sess != nil {
+	// Unsubscribe from all the topics for c Client, only for the server side though
+	//if !c.Client && c.sess != nil {
 	//	topics, _, err := c.sess.Topics()
 	//	if err != nil {
 	//		glog.Errorf("(%s/%d): %v", c.cid(), c.id, err)
@@ -203,13 +207,13 @@ func (c *client) stop() {
 	//}
 	//
 	//// Publish will message if WillFlag is set. Server side only.
-	//if !c.client && c.sess.Cmsg.WillFlag() {
-	//	glog.Infof("(%s) client/stop: connection unexpectedly closed. Sending Will.", c.cid())
+	//if !c.Client && c.sess.Cmsg.WillFlag() {
+	//	glog.Infof("(%s) Client/stop: connection unexpectedly closed. Sending Will.", c.cid())
 	//	c.onPublish(c.sess.Will)
 	//}
 	//
-	//// Remove the client topics manager
-	//if c.client {
+	//// Remove the Client topics manager
+	//if c.Client {
 	//	topics.Unregister(c.sess.ID())
 	//}
 	//
@@ -223,8 +227,8 @@ func (c *client) stop() {
 	c.out = nil
 }
 
-func (c *client) publish(msg *message.PublishMessage, onComplete OnCompleteFunc) error {
-	//glog.Debugf("client/publish: Publishing %s", msg)
+func (c *Client) publish(msg *message.PublishMessage, onComplete OnCompleteFunc) error {
+	//glog.Debugf("Client/publish: Publishing %s", msg)
 	_, err := c.writeMessage(msg)
 	if err != nil {
 		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)
@@ -248,7 +252,7 @@ func (c *client) publish(msg *message.PublishMessage, onComplete OnCompleteFunc)
 	return nil
 }
 
-func (c *client) subscribe(msg *message.SubscribeMessage, onComplete OnCompleteFunc, onPublish OnPublishFunc) error {
+func (c *Client) subscribe(msg *message.SubscribeMessage, onComplete OnCompleteFunc, onPublish OnPublishFunc) error {
 	if onPublish == nil {
 		return fmt.Errorf("onPublish function is nil. No need to subscribe.")
 	}
@@ -330,7 +334,7 @@ func (c *client) subscribe(msg *message.SubscribeMessage, onComplete OnCompleteF
 	//return c.sess.Suback.Wait(msg, onc)
 }
 
-func (c *client) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnCompleteFunc) error {
+func (c *Client) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnCompleteFunc) error {
 	_, err := c.writeMessage(msg)
 	if err != nil {
 		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)
@@ -372,8 +376,8 @@ func (c *client) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnCompl
 		var err2 error = nil
 
 		//for _, tb := range unsub.Topics() {
-		//	// Remove all subscribers, which basically it's just c client, since
-		//	// each client has it's own topic tree.
+		//	// Remove all subscribers, which basically it's just c Client, since
+		//	// each Client has it's own topic tree.
 		//	err := c.topicsMgr.Unsubscribe(tb, nil)
 		//	if err != nil {
 		//		err2 = fmt.Errorf("%v\n%v", err2, err)
@@ -393,7 +397,7 @@ func (c *client) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnCompl
 	//return c.sess.Unsuback.Wait(msg, onc)
 }
 
-func (c *client) ping(onComplete OnCompleteFunc) error {
+func (c *Client) ping(onComplete OnCompleteFunc) error {
 	msg := message.NewPingreqMessage()
 
 	_, err := c.writeMessage(msg)
@@ -404,7 +408,7 @@ func (c *client) ping(onComplete OnCompleteFunc) error {
 	//return c.sess.Pingack.Wait(msg, onComplete)
 }
 
-func (c *client) isDone() bool {
+func (c *Client) isDone() bool {
 	select {
 	case <-c.done:
 		return true
@@ -415,7 +419,7 @@ func (c *client) isDone() bool {
 	return false
 }
 
-func (c *client) cid() string {
+func (c *Client) cid() string {
 	//, c.sess.ID()
 	return fmt.Sprintf("%d/%s", c.channel.ClientId)
 }

@@ -13,6 +13,7 @@ import (
 	"net"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"time"
+	"sync"
 )
 
 type Kernel struct {
@@ -25,6 +26,7 @@ type Kernel struct {
 	config        Config
 	mq            mq.IMQ
 	mqtt          mqtt.MQTT
+	clients       sync.Map
 }
 
 func (kernel *Kernel)IsRun() bool {
@@ -65,4 +67,12 @@ func (kernel *Kernel) WaitStop() {
 	kernel.Stop()
 	stopChan <- struct{}{}
 	os.Exit(0)
+}
+
+func (kernel *Kernel)AddClient(clientId string, client interface{}) {
+	kernel.clients.Store(clientId, client)
+}
+
+func (kernel *Kernel)Arrive(msg postoffice.MQMessage)  {
+
 }

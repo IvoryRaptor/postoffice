@@ -73,11 +73,12 @@ func (k * Kafka)Start() error {
 			}
 			switch e := ev.(type) {
 			case *kafka.Message:
-				msg := MQMessage{}
+				msg := postoffice.MQMessage{}
 				err := proto.Unmarshal(e.Value, &msg)
 				if err != nil {
 					log.Println(err.Error())
 				}
+				k.kernel.Arrive(msg)
 				log.Printf("%s.%s=>%s", msg.Resource, msg.Action, msg.Actor)
 			case kafka.PartitionEOF:
 				fmt.Printf("%% Reached %v\n", e)
