@@ -21,6 +21,7 @@ import (
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"github.com/IvoryRaptor/postoffice/mq"
 	"strings"
+	"github.com/golang/protobuf/proto"
 )
 
 var (
@@ -112,14 +113,14 @@ func (c *client) processIncoming(msg message.Message) error {
 		action:=sp[3] + "." +sp[4]
 		mes := mq.MQMessage{
 			Host:     c.kernel.GetHost(),
-			Actor:    c.channel.ProductKey + c.channel.DeviceName,
+			Actor:    c.channel.ClientId,
 			Resource: sp[3],
 			Action:   sp[4],
 			Payload:  msg.Payload(),
 		}
 		topics,ok := c.kernel.GetTopics(c.channel.ProductKey,action)
 		if ok {
-			payload, _ := mes.Descriptor()
+			payload, _ := proto.Marshal(&mes)
 			for _, topic := range topics {
 				c.kernel.Publish(topic, payload)
 			}

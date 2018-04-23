@@ -3,6 +3,7 @@ package mq
 import (
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/golang/protobuf/proto"
 	"fmt"
 	"os"
 	"log"
@@ -57,14 +58,14 @@ func (k * Kafka)Config(kernel postoffice.IKernel, config *Config) error{
 	return nil
 }
 
-func (k * Kafka)Start() error{
+func (k * Kafka)Start() error {
 	log.Printf("mq start")
-	err := k.consumer.SubscribeTopics([]string{fmt.Sprintf("PostOffice-%d", k.kernel.GetHost())}, nil)
+	err := k.consumer.SubscribeTopics([]string{fmt.Sprintf("postoffice-%d", k.kernel.GetHost())}, nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create consumer: %s\n", err)
 		os.Exit(1)
 	}
-	go func(){
+	go func() {
 		for true {
 			ev := k.consumer.Poll(100)
 			if ev == nil {
@@ -72,10 +73,12 @@ func (k * Kafka)Start() error{
 			}
 			switch e := ev.(type) {
 			case *kafka.Message:
-				//msg := postoffice.MQMessage{}
-				//json.Unmarshal(e.Value, &msg)
-				//k.kernel.MessageArrive(&msg)
-				log.Printf("%s <=", "arrive")
+				msg := MQMessage{}
+				err := proto.Unmarshal(e.Value, &msg)
+				if err != nil {
+					log.Println(err.Error())
+				}
+				log.Printf("%s.%s=>%s", msg.Resource, msg.Action, msg.Actor)
 			case kafka.PartitionEOF:
 				fmt.Printf("%% Reached %v\n", e)
 			case kafka.Error:

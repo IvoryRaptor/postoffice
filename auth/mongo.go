@@ -59,13 +59,15 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 		return nil
 	}
 	config.ClientId = sp[0]
+	if len(config.ClientId) == 0 {
+		return nil
+	}
 	sp = strings.Split(sp[1], ",")
 	params := map[string]string{
 		"productKey": config.ProductKey,
 		"deviceName": config.DeviceName,
 		"clientId":   config.ClientId,
 	}
-
 	session := CloneSession() //调用这个获得session
 	defer session.Close()     //一定要记得释放
 
@@ -103,8 +105,7 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 		h.Write([]byte(key))
 		h.Write([]byte(params[key]))
 	}
-
-	if strings.EqualFold(string(msg.Password()),fmt.Sprintf("%X", h.Sum(nil))) {
+	if !strings.EqualFold(string(msg.Password()), fmt.Sprintf("%X", h.Sum(nil))) {
 		return nil
 	}
 	return &config
