@@ -54,23 +54,23 @@ func (kernel *Kernel)Config()error {
 	//set source config
 	log.Println("Config Source")
 	kernel.source = make([]source.ISource, len(kernel.config.Source))
+
 	for i, item := range kernel.config.Source {
-		switch item.Type {
+		switch item["type"].(string) {
 		case "websocket":
 			kernel.source[i] = &source.WebSocketSource{}
-		case "tcp":
-			kernel.source[i] = &source.TcpSource{}
+		case "mqtt":
+			kernel.source[i] = &source.MQTTSource{}
+		case "coap":
+			kernel.source[i] = &source.CoapSource{}
 		default:
-			log.Fatalf("unknow source type %s", item.Type)
+			log.Fatalf("unknow source type %s", item["type"].(string))
 		}
-		err = kernel.source[i].Config(kernel, item, kernel.config.SSL.Crt, kernel.config.SSL.Key)
+		err = kernel.source[i].Config(kernel, item)
 		if err != nil {
 			return err
 		}
 	}
-
-	kernel.mqtt.Config(kernel, &kernel.config.MQTT)
-
 	//kernel.authenticator = &auth.Mock{}
 	kernel.authenticator = &auth.Mongo{}
 	kernel.authenticator.Config(kernel, &kernel.config.Auth)

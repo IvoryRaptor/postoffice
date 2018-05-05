@@ -9,16 +9,22 @@ mq:
   type: kafka
   host: kafka.default
   port: 9092
-mqtt:
-  keepAlive: 300
-  connectTimeout: 2
-  ackTimeout: 20
-  timeoutRetries: 3
 source:
-  - type: tcp
+  - type: mqtt
     ssl: false
     port: 1883
+    keepAlive: 300
+    connectTimeout: 2
+    ackTimeout: 20
+    timeoutRetries: 3
   - type: websocket
+    ssl: false
+    port: 8080
+    keepAlive: 300
+    connectTimeout: 2
+    ackTimeout: 20
+    timeoutRetries: 3
+  - type: coap
     ssl: false
     port: 8080
 ssl:

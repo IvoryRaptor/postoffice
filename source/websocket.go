@@ -9,14 +9,14 @@ import (
 	"time"
 	"net"
 	"bytes"
+	"github.com/IvoryRaptor/postoffice/mqtt"
 )
 
 type WebSocketSource struct {
+	mqtt   mqtt.MQTT
 	kernel postoffice.IKernel
 	server * http.Server
 	ssl bool
-	crt string
-	key string
 }
 
 type WebSocketConn struct {
@@ -73,36 +73,39 @@ func (w *WebSocketConn) SetWriteDeadline(t time.Time) error{
 	return w.conn.SetWriteDeadline(t)
 }
 
-func (w *WebSocketSource) Config(kernel postoffice.IKernel, config Config,crt string,key string) error {
-	w.key = key
-	w.crt = crt
+func (w *WebSocketSource) Config(kernel postoffice.IKernel, config map[string]interface{}) error {
 	w.kernel = kernel
+	w.mqtt.Config(kernel, config)
 	var upgrader = websocket.Upgrader{
 		Subprotocols: []string{"mqttv3.1", "mqtt", "mqttv3.1.1"},
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
 	}
-	w.server = &http.Server{Addr: fmt.Sprintf(":%d", config.Port)}
-	w.ssl = config.SSL
+	w.server = &http.Server{Addr: fmt.Sprintf(":%d", config["port"].(int))}
+	w.ssl = config["ssl"].(bool)
 
 	http.HandleFunc("/mqtt", func(res http.ResponseWriter, req *http.Request) {
-
-		//chDone := make(chan bool)
 		c, err := upgrader.Upgrade(res, req, nil)
 		if err != nil {
 			log.Print("upgrade:", err)
 			return
 		}
+		c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(config["connectTimeout"].(int))))
 		w.kernel.AddChannel(&WebSocketConn{conn: c})
 	})
 	return nil
 }
 
 func (w *WebSocketSource) Start() error {
+	err:=w.mqtt.Start()
+	if err != nil {
+		return err
+	}
 	go func() {
 		if w.ssl {
-			if err := w.server.ListenAndServeTLS(w.crt, w.key); err != nil {
+			crt, key := w.kernel.GetSSL()
+			if err := w.server.ListenAndServeTLS(crt, key); err != nil {
 				log.Printf("Httpserver: ListenAndServe() error: %s", err)
 			}
 		} else {
@@ -115,5 +118,6 @@ func (w *WebSocketSource) Start() error {
 }
 
 func (w *WebSocketSource) Stop(){
+	w.mqtt.Stop()
 	w.server.Shutdown(nil)
 }

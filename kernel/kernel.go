@@ -12,7 +12,6 @@ import (
 	"github.com/IvoryRaptor/postoffice/mqtt"
 	"net"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"time"
 	"sync"
 	"fmt"
 )
@@ -47,7 +46,6 @@ func (kernel *Kernel)GetTopics(matrix string, action string) ([]string, bool){
 }
 
 func (kernel *Kernel) AddChannel(c net.Conn) (err error){
-	c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(kernel.config.MQTT.ConnectTimeout)))
 	go kernel.mqtt.AddChannel(c)
 	return nil
 }
@@ -90,4 +88,8 @@ func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
 		pus.SetPayload(msg.Payload)
 		client.Publish(pus)
 	}
+}
+
+func (kernel *Kernel)GetSSL() (crt string, key string) {
+	return kernel.config.SSL.Crt, kernel.config.SSL.Key
 }

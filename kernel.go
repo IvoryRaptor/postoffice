@@ -24,4 +24,5 @@ type IKernel interface {
 	Publish(topic string, payload []byte) error
 	AddClient(clientId string, client IClient)
 	Arrive(msg *MQMessage)
+	GetSSL() (crt string, key string)
 }

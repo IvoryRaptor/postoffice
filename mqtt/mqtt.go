@@ -21,7 +21,7 @@ const (
 
 type MQTT struct {
 	kernel postoffice.IKernel
-	config * Config
+	config map[string]interface{}
 }
 
 func (m * MQTT)AddChannel(conn net.Conn) (err error) {
@@ -57,9 +57,9 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 
 	svc := &Client{
 		keepAlive:      int(req.KeepAlive()),
-		connectTimeout: m.config.ConnectTimeout,
-		ackTimeout:     m.config.AckTimeout,
-		timeoutRetries: m.config.TimeoutRetries,
+		connectTimeout: m.config["connectTimeout"].(int),
+		ackTimeout:     m.config["ackTimeout"].(int),
+		timeoutRetries: m.config["timeoutRetries"].(int),
 		conn:           conn,
 		kernel:         m.kernel,
 		channel:        channel,
