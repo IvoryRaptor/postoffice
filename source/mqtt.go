@@ -18,40 +18,40 @@ type MQTTSource struct {
 	ln     net.Listener
 }
 
-func (w *MQTTSource) Config(kernel postoffice.IKernel, config map[string]interface{}) error {
-	w.kernel = kernel
-	w.mqtt.Config(kernel, config)
-	w.ssl = config["ssl"].(bool)
-	w.port = fmt.Sprintf(":%d", config["port"].(int))
+func (s *MQTTSource) Config(kernel postoffice.IKernel, config map[string]interface{}) error {
+	s.kernel = kernel
+	s.mqtt.Config(kernel, config)
+	s.ssl = config["ssl"].(bool)
+	s.port = fmt.Sprintf(":%d", config["port"].(int))
 	return nil
 }
 
-func (w *MQTTSource) Start() error {
-	err:=w.mqtt.Start()
+func (s *MQTTSource) Start() error {
+	err:= s.mqtt.Start()
 	if err != nil {
 		return err
 	}
-	if w.ssl {
-		crt, key := w.kernel.GetSSL()
+	if s.ssl {
+		crt, key := s.kernel.GetSSL()
 		cert, err := tls.LoadX509KeyPair(crt, key)
 		if err != nil {
 			return err
 		}
-		w.config = &tls.Config{Certificates: []tls.Certificate{cert}}
-		log.Printf("Listen ssl %s", w.port)
-		w.ln, err = tls.Listen("tcp", w.port, w.config)
+		s.config = &tls.Config{Certificates: []tls.Certificate{cert}}
+		log.Printf("Listen ssl %s", s.port)
+		s.ln, err = tls.Listen("tcp", s.port, s.config)
 	} else {
-		log.Printf("Listen tcp %s", w.port)
-		w.ln, err = net.Listen("tcp", w.port)
+		log.Printf("Listen tcp %s", s.port)
+		s.ln, err = net.Listen("tcp", s.port)
 	}
 	if err != nil {
 		return err
 	}
 	go func() {
 		for {
-			conn, err := w.ln.Accept()
-			log.Printf("Accept %s => %s ", conn.RemoteAddr(), w.port)
-			w.kernel.AddChannel(conn)
+			conn, err := s.ln.Accept()
+			log.Printf("Accept %s => %s ", conn.RemoteAddr(), s.port)
+			s.kernel.AddChannel(conn)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -62,6 +62,6 @@ func (w *MQTTSource) Start() error {
 	return nil
 }
 
-func (w *MQTTSource) Stop(){
-	w.mqtt.Stop()
+func (s *MQTTSource) Stop(){
+	s.mqtt.Stop()
 }

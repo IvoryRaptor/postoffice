@@ -73,17 +73,17 @@ func (w *WebSocketConn) SetWriteDeadline(t time.Time) error{
 	return w.conn.SetWriteDeadline(t)
 }
 
-func (w *WebSocketSource) Config(kernel postoffice.IKernel, config map[string]interface{}) error {
-	w.kernel = kernel
-	w.mqtt.Config(kernel, config)
+func (s *WebSocketSource) Config(kernel postoffice.IKernel, config map[string]interface{}) error {
+	s.kernel = kernel
+	s.mqtt.Config(kernel, config)
 	var upgrader = websocket.Upgrader{
 		Subprotocols: []string{"mqttv3.1", "mqtt", "mqttv3.1.1"},
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
 	}
-	w.server = &http.Server{Addr: fmt.Sprintf(":%d", config["port"].(int))}
-	w.ssl = config["ssl"].(bool)
+	s.server = &http.Server{Addr: fmt.Sprintf(":%d", config["port"].(int))}
+	s.ssl = config["ssl"].(bool)
 
 	http.HandleFunc("/mqtt", func(res http.ResponseWriter, req *http.Request) {
 		c, err := upgrader.Upgrade(res, req, nil)
@@ -92,24 +92,24 @@ func (w *WebSocketSource) Config(kernel postoffice.IKernel, config map[string]in
 			return
 		}
 		c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(config["connectTimeout"].(int))))
-		w.kernel.AddChannel(&WebSocketConn{conn: c})
+		s.kernel.AddChannel(&WebSocketConn{conn: c})
 	})
 	return nil
 }
 
-func (w *WebSocketSource) Start() error {
-	err:=w.mqtt.Start()
+func (s *WebSocketSource) Start() error {
+	err:= s.mqtt.Start()
 	if err != nil {
 		return err
 	}
 	go func() {
-		if w.ssl {
-			crt, key := w.kernel.GetSSL()
-			if err := w.server.ListenAndServeTLS(crt, key); err != nil {
+		if s.ssl {
+			crt, key := s.kernel.GetSSL()
+			if err := s.server.ListenAndServeTLS(crt, key); err != nil {
 				log.Printf("Httpserver: ListenAndServe() error: %s", err)
 			}
 		} else {
-			if err := w.server.ListenAndServe(); err != nil {
+			if err := s.server.ListenAndServe(); err != nil {
 				log.Printf("Httpserver: ListenAndServe() error: %s", err)
 			}
 		}
@@ -117,7 +117,7 @@ func (w *WebSocketSource) Start() error {
 	return nil
 }
 
-func (w *WebSocketSource) Stop(){
-	w.mqtt.Stop()
-	w.server.Shutdown(nil)
+func (s *WebSocketSource) Stop(){
+	s.mqtt.Stop()
+	s.server.Shutdown(nil)
 }
