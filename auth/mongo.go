@@ -21,8 +21,12 @@ type Mongo struct {
 
 var GlobalMgoSession *mgo.Session
 
-func init() {
-	globalMgoSession, err := mgo.DialWithTimeout("mongodb://192.168.41.170:30707", 10 * time.Second)
+func CloneSession() *mgo.Session {
+	return GlobalMgoSession.Clone()
+}
+
+func (a *Mongo) Config(kernel postoffice.IKernel,config *Config) error{
+	globalMgoSession, err := mgo.DialWithTimeout(config.Url, 10 * time.Second)
 	if err != nil {
 		panic(err)
 	}
@@ -30,13 +34,6 @@ func init() {
 	GlobalMgoSession.SetMode(mgo.Monotonic, true)
 	//default is 4096
 	GlobalMgoSession.SetPoolLimit(300)
-}
-
-func CloneSession() *mgo.Session {
-	return GlobalMgoSession.Clone()
-}
-
-func (a *Mongo) Config(kernel postoffice.IKernel,config *Config) error{
 	return nil
 }
 
