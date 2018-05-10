@@ -99,7 +99,6 @@ func (kernel *Kernel) Start() error {
 			return err
 		}
 	}
-	kernel.mqtt.Start()
 	return nil
 }
 
@@ -110,5 +109,4 @@ func (kernel *Kernel) Stop() {
 	}
 	kernel.mq.Stop()
 	kernel.matrixManger.Stop()
-	kernel.mqtt.Stop()
 }

@@ -92,7 +92,7 @@ func (s *WebSocketSource) Config(kernel postoffice.IKernel, config map[string]in
 			return
 		}
 		c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(config["connectTimeout"].(int))))
-		s.kernel.AddChannel(&WebSocketConn{conn: c})
+		s.mqtt.AddChannel(&WebSocketConn{conn: c})
 	})
 	return nil
 }

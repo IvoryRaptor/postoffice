@@ -51,7 +51,7 @@ func (s *MQTTSource) Start() error {
 		for {
 			conn, err := s.ln.Accept()
 			log.Printf("Accept %s => %s ", conn.RemoteAddr(), s.port)
-			s.kernel.AddChannel(conn)
+			go s.mqtt.AddChannel(conn)
 			if err != nil {
 				log.Println(err)
 				continue

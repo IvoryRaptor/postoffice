@@ -10,7 +10,6 @@ import (
 	"github.com/IvoryRaptor/postoffice/mq"
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mqtt"
-	"net"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"sync"
 	"fmt"
@@ -25,7 +24,6 @@ type Kernel struct {
 	matrixManger  matrix.Manager
 	config        Config
 	mq            mq.IMQ
-	mqtt          mqtt.MQTT
 	clients       sync.Map
 }
 
@@ -43,11 +41,6 @@ func (kernel *Kernel)GetTopics(matrix string, action string) ([]string, bool){
 		return nil,false
 	}
 	return m.GetTopics(action)
-}
-
-func (kernel *Kernel) AddChannel(c net.Conn) (err error){
-	go kernel.mqtt.AddChannel(c)
-	return nil
 }
 
 func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig{
