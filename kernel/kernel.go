@@ -13,6 +13,7 @@ import (
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"sync"
 	"fmt"
+	"github.com/golang/protobuf/proto"
 )
 
 type Kernel struct {
@@ -47,8 +48,24 @@ func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 	return kernel.authenticator.Authenticate(msg)
 }
 
-func (kernel *Kernel) Publish(topic string,payload []byte) error {
-	return kernel.mq.Publish(topic, payload)
+func (kernel *Kernel) Publish(channel * postoffice.ChannelConfig, resource string,action string, payload []byte) error {
+	mes := postoffice.MQMessage{
+		Host:     kernel.GetHost(),
+		Actor:    channel.ClientId,
+		Resource: resource,
+		Action:   action,
+		Payload:  payload,
+	}
+	topics, ok := kernel.GetTopics(channel.ProductKey, resource+"."+action)
+	if ok {
+		payload, _ := proto.Marshal(&mes)
+		for _, topic := range topics {
+			kernel.mq.Publish(topic, payload)
+		}
+	} else {
+		println(channel.ProductKey, action, "miss")
+	}
+	return nil
 }
 
 func (kernel *Kernel) WaitStop() {

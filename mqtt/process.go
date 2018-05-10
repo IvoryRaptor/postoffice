@@ -20,8 +20,6 @@ import (
 	"io"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"strings"
-	"github.com/golang/protobuf/proto"
-	"github.com/IvoryRaptor/postoffice"
 )
 
 var (
@@ -104,29 +102,9 @@ func (c *Client) processIncoming(msg message.Message) error {
 	switch msg := msg.(type) {
 	case *message.PublishMessage:
 		sp:=strings.Split(string(msg.Topic()),"/")
-		if len(sp)<5{
-			return nil
-		}
-		if sp[1]!= c.channel.ProductKey || sp[2]!=c.channel.DeviceName{
-			return nil
-		}
-		action:=sp[3] + "." +sp[4]
-		mes := postoffice.MQMessage{
-			Host:     c.kernel.GetHost(),
-			Actor:    c.channel.ClientId,
-			Resource: sp[3],
-			Action:   sp[4],
-			Payload:  msg.Payload(),
-		}
-		topics,ok := c.kernel.GetTopics(c.channel.ProductKey,action)
-		if ok {
-			payload, _ := proto.Marshal(&mes)
-			for _, topic := range topics {
-				c.kernel.Publish(topic, payload)
-			}
-		}else {
-			println(c.channel.ProductKey, action, "miss")
-		}
+		c.kernel.Publish(c.channel,sp[3],sp[4],msg.Payload())
+
+
 	case *message.PubackMessage:
 		// For PUBACK message, it means QoS 1, we should send to ack queue
 		//c.sess.Pub1ack.Ack(msg)
