@@ -51,8 +51,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 		return err
 	}
 
-
-	m.kernel.Publish(channel,"device","online" ,[]byte{})
+	m.kernel.Publish(channel,"device","online" ,[]byte(channel.DeviceName))
 
 	if req.KeepAlive() == 0 {
 		req.SetKeepAlive(minKeepAlive)
