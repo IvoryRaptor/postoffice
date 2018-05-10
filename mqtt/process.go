@@ -125,7 +125,7 @@ func (c *Client) processIncoming(msg message.Message) error {
 				c.kernel.Publish(topic, payload)
 			}
 		}else {
-			println("miss ")
+			println(c.channel.ProductKey, action, "miss")
 		}
 	case *message.PubackMessage:
 		// For PUBACK message, it means QoS 1, we should send to ack queue
