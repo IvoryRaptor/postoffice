@@ -60,7 +60,7 @@ func (kernel *Kernel) Publish(channel * postoffice.ChannelConfig, resource strin
 	if ok {
 		payload, _ := proto.Marshal(&mes)
 		for _, topic := range topics {
-			kernel.mq.Publish(topic, payload)
+			kernel.mq.Publish(topic, []byte(channel.DeviceName), payload)
 		}
 	} else {
 		println(channel.ProductKey, action, "miss")

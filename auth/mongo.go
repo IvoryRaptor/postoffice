@@ -47,7 +47,7 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 		return nil
 	}
 	config := postoffice.ChannelConfig{
-		DeviceName: sp[0],
+		DeviceName: []byte(sp[0]),
 		ProductKey: sp[1],
 	}
 
@@ -60,9 +60,10 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 		return nil
 	}
 	sp = strings.Split(sp[1], ",")
+	deviceName:=string(config.DeviceName)
 	params := map[string]string{
 		"productKey": config.ProductKey,
-		"deviceName": config.DeviceName,
+		"deviceName": deviceName,
 		"clientId":   config.ClientId,
 	}
 	session := CloneSession() //调用这个获得session
@@ -70,7 +71,7 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 
 	c := session.DB("tortoise").C("oauth_devices")
 	data := bson.M{}
-	err := c.Find(bson.M{"productKey": config.ProductKey, "deviceName": config.DeviceName}).One(data)
+	err := c.Find(bson.M{"productKey": config.ProductKey, "deviceName": deviceName}).One(data)
 	if err != nil {
 		println(err.Error())
 		return nil

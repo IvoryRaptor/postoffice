@@ -15,10 +15,14 @@ type Kafka struct {
 	consumer *kafka.Consumer
 }
 
-func (k * Kafka)Publish(topic string,payload []byte) error {
+func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
 	deliveryChan := make(chan kafka.Event)
 	err := k.producer.Produce(
-		&kafka.Message{TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny}, Value: payload},
+		&kafka.Message{
+			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+			Key:            actor,
+			Value:          payload,
+		},
 		deliveryChan)
 
 	e := <-deliveryChan
