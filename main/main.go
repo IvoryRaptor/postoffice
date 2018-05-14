@@ -14,7 +14,6 @@ func main() {
 	}
 	hostname := flag.String("hostname", os.Getenv("hostname"), "is ok")
 	flag.Parse()
-	println(*hostname)
 	err := k.Config(*hostname)
 	if err != nil {
 		log.Fatalf(err.Error())
