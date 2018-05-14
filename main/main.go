@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/IvoryRaptor/postoffice/kernel"
 	"log"
+	"os"
+	"flag"
 )
 
 
@@ -10,7 +12,8 @@ func main() {
 	k := kernel.Kernel{
 		ConfigFile: "./config/postoffice/config.yaml",
 	}
-	err := k.Config()
+	hostname := flag.String("hostname", os.Getenv("hostname"), "is ok")
+	err := k.Config(*hostname)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}

@@ -3,7 +3,6 @@ package kernel
 import (
 	"regexp"
 	"strconv"
-	"os"
 	"github.com/IvoryRaptor/postoffice/source"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
@@ -14,18 +13,17 @@ import (
 	"fmt"
 )
 
-func (kernel *Kernel)Config()error {
+func (kernel *Kernel)Config(hostname string)error {
 	var err error
 
-	log.Println("Config HostName")
+	log.Println("Config HostName:" + hostname)
 	//Get kubernetes hostname
 	reg := regexp.MustCompile(`(\d+)`)
-	host, err := strconv.Atoi(reg.FindString(os.Getenv("hostname")))
+	host, err := strconv.Atoi(reg.FindString(hostname))
 	if err != nil {
 		return err
 	}
 	kernel.host = int32(host)
-
 	//Load Config
 	log.Println("Load Config File", kernel.ConfigFile)
 	data, err := ioutil.ReadFile(kernel.ConfigFile)
