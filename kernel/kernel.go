@@ -87,16 +87,27 @@ func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
 	if ok {
 		client := val.(*mqtt.Client)
 		channel := client.GetChannel()
-		pus := message.NewPublishMessage()
-		topic := fmt.Sprintf(
-			"%s/%s/%s/%s",
-			channel.ProductKey,
-			channel.DeviceName,
-			msg.Resource,
-			msg.Action)
-		pus.SetTopic([]byte(topic))
-		pus.SetPayload(msg.Payload)
-		client.Publish(pus)
+		switch msg.Resource {
+		case "system":
+			switch msg.Action {
+			case "close":
+				client.Stop()
+			default:
+
+			}
+		default:
+			pus := message.NewPublishMessage()
+			topic := fmt.Sprintf(
+				"%s/%s/%s/%s",
+				channel.ProductKey,
+				channel.DeviceName,
+				msg.Resource,
+				msg.Action)
+			pus.SetTopic([]byte(topic))
+			pus.SetPayload(msg.Payload)
+			client.Publish(pus)
+		}
+
 	}
 }
 

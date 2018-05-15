@@ -35,7 +35,7 @@ func (c *Client) processor() {
 		}
 
 		c.wgStopped.Done()
-		c.stop()
+		c.Stop()
 
 		//glog.Debugf("(%s) Stopping processor", c.cid())
 	}()
