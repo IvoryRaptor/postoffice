@@ -107,7 +107,8 @@ func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
 			pus.SetPayload(msg.Payload)
 			client.Publish(pus)
 		}
-
+	}else{
+		println("123456")
 	}
 }
 
