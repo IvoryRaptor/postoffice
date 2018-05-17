@@ -21,7 +21,7 @@ type IKernel interface {
 	Authenticate(msg *message.ConnectMessage) *ChannelConfig
 	Publish(channel * ChannelConfig, resource string,action string, payload []byte) error
 
-	AddClient(clientId string, client IClient)
+	AddDevice(device string, client IClient)
 	Arrive(msg *MQMessage)
 	GetSSL() (crt string, key string)
 }

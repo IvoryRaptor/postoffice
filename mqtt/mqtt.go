@@ -75,7 +75,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 	svc.inStat.increment(int64(req.Len()))
 	svc.outStat.increment(int64(resp.Len()))
 
-	m.kernel.AddClient(channel.DeviceName, svc)
+	m.kernel.AddDevice(channel.DeviceName, svc)
 	if err := svc.start(); err != nil {
 		svc.Stop()
 		return err

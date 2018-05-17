@@ -51,7 +51,7 @@ func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 func (kernel *Kernel) Publish(channel * postoffice.ChannelConfig, resource string,action string, payload []byte) error {
 	mes := postoffice.MQMessage{
 		Host:     kernel.GetHost(),
-		Actor:    channel.ClientId,
+		Actor:    channel.DeviceName,
 		Resource: resource,
 		Action:   action,
 		Payload:  payload,
@@ -78,8 +78,8 @@ func (kernel *Kernel) WaitStop() {
 	os.Exit(0)
 }
 
-func (kernel *Kernel)AddClient(clientId string, client postoffice.IClient) {
-	kernel.clients.Store(clientId, client)
+func (kernel *Kernel)AddDevice(deviceName string, client postoffice.IClient) {
+	kernel.clients.Store(deviceName, client)
 }
 
 func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {

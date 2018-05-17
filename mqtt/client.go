@@ -420,6 +420,5 @@ func (c *Client) isDone() bool {
 }
 
 func (c *Client) cid() string {
-	//, c.sess.ID()
-	return fmt.Sprintf("%d/%s", c.channel.ClientId)
+	return fmt.Sprintf("%s", c.channel.ClientId)
 }
