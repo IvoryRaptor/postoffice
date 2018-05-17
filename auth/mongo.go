@@ -112,9 +112,6 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 			h.Write([]byte(key))
 			h.Write([]byte(params[key]))
 		}
-		println(string(msg.Password()))
-		println(fmt.Sprintf("%X", h.Sum(nil)))
-
 		if !strings.EqualFold(string(msg.Password()), fmt.Sprintf("%X", h.Sum(nil))) {
 			return nil
 		}
