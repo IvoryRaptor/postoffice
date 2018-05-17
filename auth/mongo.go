@@ -47,7 +47,7 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 		return nil
 	}
 	config := postoffice.ChannelConfig{
-		DeviceName: []byte(sp[0]),
+		DeviceName: sp[0],
 		ProductKey: sp[1],
 	}
 

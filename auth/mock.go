@@ -20,7 +20,7 @@ func (a *Mock) Start() error{
 func (a *Mock) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
 	config := postoffice.ChannelConfig{
 		ClientId:   string(msg.ClientId()),
-		DeviceName: msg.Username(),
+		DeviceName: string(msg.Username()),
 		ProductKey: string(msg.Password()),
 	}
 	return &config

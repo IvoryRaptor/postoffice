@@ -6,7 +6,7 @@ import (
 
 type ChannelConfig struct{
 	ClientId string
-	DeviceName []byte
+	DeviceName string
 	ProductKey string
 }
 
