@@ -112,12 +112,15 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 			h.Write([]byte(key))
 			h.Write([]byte(params[key]))
 		}
+		//time.Now().AddDate(0, 0, 1)
+		//time.Date(2014, time.November, 5, 0, 0, 0, 0, time.UTC)
+
 		if !strings.EqualFold(string(msg.Password()), fmt.Sprintf("%X", h.Sum(nil))) {
 			return nil
 		}
 	} else {
 		data := bson.M{}
-		err := c.Find(bson.M{"token": clientId}).One(data)
+		err := c.Find(bson.M{"token": clientId,"time":bson.M{"$gte":time.Now()}}).One(data)
 		if err != nil {
 			return nil
 		}
@@ -127,7 +130,10 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 	token := randSeq(8)
 	c.Update(
 		bson.M{"productKey": productKey, "deviceName": deviceName},
-		bson.M{"$set": bson.M{"token": token}},
+		bson.M{"$set": bson.M{
+			"token": token,
+			"time":  time.Now().AddDate(0, 0, 2),
+		}},
 	)
 	config := postoffice.ChannelConfig{
 		DeviceName: deviceName,
