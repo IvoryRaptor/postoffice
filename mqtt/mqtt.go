@@ -52,7 +52,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 		return err
 	}
 
-	m.kernel.Publish(channel,"device","online" ,[]byte(channel.DeviceName + "@" + channel.Token))
+	m.kernel.Publish(channel, "device", "online", []byte(channel.DeviceName+"@"+channel.Token))
 	fmt.Printf("%s device online\n", string([]byte(channel.DeviceName)))
 	if req.KeepAlive() == 0 {
 		req.SetKeepAlive(minKeepAlive)
@@ -76,7 +76,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 	svc.inStat.increment(int64(req.Len()))
 	svc.outStat.increment(int64(resp.Len()))
 
-	m.kernel.AddDevice(channel.DeviceName, svc)
+	m.kernel.AddDevice(channel.ProductKey+"/"+channel.DeviceName, svc)
 	if err := svc.start(); err != nil {
 		svc.Stop()
 		return err

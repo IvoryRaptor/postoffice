@@ -64,7 +64,8 @@ func (k * Kafka)Config(kernel postoffice.IKernel, config *Config) error{
 
 func (k * Kafka)Start() error {
 	log.Printf("mq start")
-	err := k.consumer.SubscribeTopics([]string{fmt.Sprintf("postoffice-%d", k.kernel.GetHost())}, nil)
+	err := k.consumer.SubscribeTopics([]string{fmt.Sprintf("postoffice-%s", k.kernel.GetHost())}, nil)
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create consumer: %s\n", err)
 		os.Exit(1)
@@ -83,7 +84,7 @@ func (k * Kafka)Start() error {
 					log.Println(err.Error())
 				}
 				k.kernel.Arrive(&msg)
-				log.Printf("%s.%s=>%s", msg.Resource, msg.Action, msg.Actor)
+				log.Printf("%s.%s=>%s/%s", msg.Resource, msg.Action, msg.Provider.Matrix,msg.Provider.Device)
 			case kafka.PartitionEOF:
 				fmt.Printf("%% Reached %v\n", e)
 			case kafka.Error:

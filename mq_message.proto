@@ -1,10 +1,14 @@
 syntax = "proto3";
-package mq;
+package postoffice;
 
+message Address {
+    string matrix = 1;
+    string device = 2;
+}
 
 message MQMessage {
-    int32 host = 1; //主机名
-    string actor = 2; //链接
+    Address provider = 1; //服务提供者
+    Address user = 2; //服务使用者
     string resource = 3; //资源
     string action = 4; //动作
     bytes payload = 5; //数据

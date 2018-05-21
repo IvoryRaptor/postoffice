@@ -7,17 +7,17 @@ import (
 	"github.com/IvoryRaptor/postoffice/source"
 	"github.com/IvoryRaptor/postoffice/auth"
 	"github.com/IvoryRaptor/postoffice/matrix"
-	"github.com/IvoryRaptor/postoffice/mq"
-	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mqtt"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"sync"
 	"fmt"
 	"github.com/golang/protobuf/proto"
+	"github.com/IvoryRaptor/postoffice"
+	"github.com/IvoryRaptor/postoffice/mq"
 )
 
 type Kernel struct {
-	host          int32
+	host          string
 	ConfigFile    string
 	run           bool
 	source        []source.ISource
@@ -32,7 +32,7 @@ func (kernel *Kernel)IsRun() bool {
 	return kernel.run
 }
 
-func (kernel *Kernel)GetHost() int32{
+func (kernel *Kernel)GetHost() string{
 	return kernel.host
 }
 
@@ -50,8 +50,14 @@ func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 
 func (kernel *Kernel) Publish(channel * postoffice.ChannelConfig, resource string,action string, payload []byte) error {
 	mes := postoffice.MQMessage{
-		Host:     kernel.GetHost(),
-		Actor:    channel.DeviceName,
+		Provider: &postoffice.Address{
+			Matrix: "POSTOFFICE",
+			Device: kernel.GetHost(),
+		},
+		User:&postoffice.Address{
+			Matrix:channel.ProductKey,
+			Device:channel.DeviceName,
+		},
 		Resource: resource,
 		Action:   action,
 		Payload:  payload,
@@ -83,7 +89,7 @@ func (kernel *Kernel)AddDevice(deviceName string, client postoffice.IClient) {
 }
 
 func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
-	val, ok := kernel.clients.Load(msg.Actor)
+	val, ok := kernel.clients.Load(msg.User.Matrix + "/" + msg.User.Device)
 	if ok {
 		client := val.(*mqtt.Client)
 		channel := client.GetChannel()

@@ -15,7 +15,7 @@ type IClient interface {
 }
 
 type IKernel interface {
-	GetHost() int32
+	GetHost() string
 	Start() error
 	GetTopics(matrix string, action string) ([]string, bool)
 	Authenticate(msg *message.ConnectMessage) *ChannelConfig

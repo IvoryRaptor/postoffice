@@ -2,7 +2,6 @@ package kernel
 
 import (
 	"regexp"
-	"strconv"
 	"github.com/IvoryRaptor/postoffice/source"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
@@ -19,11 +18,7 @@ func (kernel *Kernel)Config(hostname string)error {
 	log.Println("Config HostName:" + hostname)
 	//Get kubernetes hostname
 	reg := regexp.MustCompile(`(\d+)`)
-	host, err := strconv.Atoi(reg.FindString(hostname))
-	if err != nil {
-		return err
-	}
-	kernel.host = int32(host)
+	kernel.host = reg.FindString(hostname)
 	//Load Config
 	log.Println("Load Config File", kernel.ConfigFile)
 	data, err := ioutil.ReadFile(kernel.ConfigFile)
