@@ -89,7 +89,7 @@ func (kernel *Kernel)AddDevice(deviceName string, client postoffice.IClient) {
 }
 
 func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
-	val, ok := kernel.clients.Load(msg.User.Matrix + "/" + msg.User.Device)
+	val, ok := kernel.clients.Load(msg.Provider.Matrix + "/" + msg.Provider.Device)
 	if ok {
 		client := val.(*mqtt.Client)
 		channel := client.GetChannel()
@@ -114,7 +114,7 @@ func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
 			client.Publish(pus)
 		}
 	}else{
-		println("123456")
+		println("miss")
 	}
 }
 
