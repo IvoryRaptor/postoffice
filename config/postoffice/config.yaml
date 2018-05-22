@@ -5,6 +5,9 @@ matrix:
   zookeeper:
     host: zookeeper.default
     port: 2181
+redis:
+  host: redis.default
+  port: 6379
 mq:
   type: kafka
   host: kafka.default

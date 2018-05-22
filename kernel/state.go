@@ -10,6 +10,7 @@ import (
 	"github.com/IvoryRaptor/postoffice/mq"
 	"errors"
 	"fmt"
+	"github.com/garyburd/redigo/redis"
 )
 
 func (kernel *Kernel)Config(hostname string)error {
@@ -73,6 +74,12 @@ func (kernel *Kernel)Config(hostname string)error {
 func (kernel *Kernel) Start() error {
 	var err error
 	kernel.run = true
+	c, err := redis.Dial("tcp", fmt.Sprintf("%s:%d", kernel.config.Redis.Host, kernel.config.Redis.Port))
+	if err != nil {
+		return err
+	}
+	kernel.redis = c
+
 	log.Println("Start MQ")
 	err = kernel.mq.Start()
 	if err != nil {
@@ -96,6 +103,7 @@ func (kernel *Kernel) Start() error {
 }
 
 func (kernel *Kernel) Stop() {
+	kernel.redis.Close()
 	kernel.run = false
 	for _, item := range kernel.source {
 		item.Stop()

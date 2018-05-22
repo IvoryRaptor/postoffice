@@ -14,6 +14,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mq"
+	"github.com/garyburd/redigo/redis"
 )
 
 type Kernel struct {
@@ -26,6 +27,8 @@ type Kernel struct {
 	config        Config
 	mq            mq.IMQ
 	clients       sync.Map
+	redis         redis.Conn
+	redisMutex    sync.Mutex
 }
 
 func (kernel *Kernel)IsRun() bool {
@@ -85,7 +88,10 @@ func (kernel *Kernel) WaitStop() {
 }
 
 func (kernel *Kernel)AddDevice(deviceName string, client postoffice.IClient) {
+	kernel.redisMutex.Lock()
+	kernel.redis.Do("HMSET", "POSTOFFICE", deviceName, kernel.host)
 	kernel.clients.Store(deviceName, client)
+	kernel.redisMutex.Unlock()
 }
 
 func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
