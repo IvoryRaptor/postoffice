@@ -94,6 +94,13 @@ func (kernel *Kernel)AddDevice(deviceName string, client postoffice.IClient) {
 	kernel.redisMutex.Unlock()
 }
 
+func (kernel *Kernel)Close(deviceName string){
+	kernel.redisMutex.Lock()
+	kernel.redis.Do("HDEL", "POSTOFFICE", deviceName)
+	kernel.clients.Delete(deviceName)
+	kernel.redisMutex.Unlock()
+}
+
 func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
 	val, ok := kernel.clients.Load(msg.Provider.Matrix + "/" + msg.Provider.Device)
 	if ok {

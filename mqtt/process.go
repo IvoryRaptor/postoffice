@@ -87,6 +87,7 @@ func (c *Client) processor() {
 
 		// 7. Check to see if done is closed, if so, exit
 		if c.isDone() && c.in.Len() == 0 {
+			print("close !!!")
 			return
 		}
 

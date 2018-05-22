@@ -73,6 +73,8 @@ func (c *Client) receiver() {
 
 			if err != nil {
 				if err != io.EOF {
+					c.kernel.Publish(c.channel, "device", "offline", []byte(c.channel.DeviceName+"@"+c.channel.Token))
+					c.kernel.Close(c.cid())
 					glog.Errorf("(%s) error reading from connection: %v", c.cid(), err)
 				}
 				return
