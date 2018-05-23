@@ -58,21 +58,21 @@ func (kernel *Kernel) Publish(channel * postoffice.ChannelConfig, resource strin
 			Device: kernel.GetHost(),
 		},
 		Destination:&postoffice.Address{
-			Matrix:channel.ProductKey,
+			Matrix:channel.Matrix,
 			Device:channel.DeviceName,
 		},
 		Resource: resource,
 		Action:   action,
 		Payload:  payload,
 	}
-	topics, ok := kernel.GetTopics(channel.ProductKey, resource+"."+action)
+	topics, ok := kernel.GetTopics(channel.Matrix, resource+"."+action)
 	if ok {
 		payload, _ := proto.Marshal(&mes)
 		for _, topic := range topics {
 			kernel.mq.Publish(topic, []byte(channel.DeviceName), payload)
 		}
 	} else {
-		println(channel.ProductKey, action, "miss")
+		println(channel.Matrix, action, "miss")
 	}
 	return nil
 }
@@ -118,7 +118,7 @@ func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
 			pus := message.NewPublishMessage()
 			topic := fmt.Sprintf(
 				"%s/%s/%s/%s",
-				channel.ProductKey,
+				channel.Matrix,
 				channel.DeviceName,
 				msg.Resource,
 				msg.Action)

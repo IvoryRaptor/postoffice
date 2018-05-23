@@ -420,5 +420,5 @@ func (c *Client) isDone() bool {
 }
 
 func (c *Client) cid() string {
-	return fmt.Sprintf("%s/%s", c.channel.ProductKey, c.channel.DeviceName)
+	return fmt.Sprintf("%s/%s", c.channel.Matrix, c.channel.DeviceName)
 }

@@ -6,8 +6,8 @@ import (
 
 type ChannelConfig struct{
 	DeviceName string
-	ProductKey string
-	Token string
+	Matrix     string
+	Token      string
 }
 
 type IClient interface {

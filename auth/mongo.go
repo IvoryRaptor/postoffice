@@ -137,7 +137,7 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 	)
 	config := postoffice.ChannelConfig{
 		DeviceName: deviceName,
-		ProductKey: productKey,
+		Matrix:     productKey,
 		Token:      token,
 	}
 	return &config

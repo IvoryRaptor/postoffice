@@ -21,7 +21,7 @@ func (a *Mock) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConf
 	config := postoffice.ChannelConfig{
 		//ClientId:   string(msg.ClientId()),
 		DeviceName: string(msg.Username()),
-		ProductKey: string(msg.Password()),
+		Matrix:     string(msg.Password()),
 	}
 	return &config
 }
