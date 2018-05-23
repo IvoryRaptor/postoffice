@@ -81,7 +81,7 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 			"deviceName": deviceName,
 		}
 		data := bson.M{}
-		err := c.Find(bson.M{"productKey": productKey, "deviceName": deviceName}).One(data)
+		err := c.Find(bson.M{"matrix": productKey, "deviceName": deviceName}).One(data)
 		if err != nil {
 			println(err.Error())
 			return nil
@@ -125,11 +125,11 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 			return nil
 		}
 		deviceName = data["deviceName"].(string)
-		productKey = data["productKey"].(string)
+		productKey = data["matrix"].(string)
 	}
 	token := randSeq(8)
 	c.Update(
-		bson.M{"productKey": productKey, "deviceName": deviceName},
+		bson.M{"matrix": productKey, "deviceName": deviceName},
 		bson.M{"$set": bson.M{
 			"token": token,
 			"time":  time.Now().AddDate(0, 0, 2),
