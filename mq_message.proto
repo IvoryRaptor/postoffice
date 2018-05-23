@@ -7,8 +7,8 @@ message Address {
 }
 
 message MQMessage {
-    Address provider = 1; //服务提供者
-    Address user = 2; //服务使用者
+    Address source = 1; //服务提供者
+    Address destination = 2; //服务使用者
     string resource = 3; //资源
     string action = 4; //动作
     bytes payload = 5; //数据

@@ -53,11 +53,11 @@ func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 
 func (kernel *Kernel) Publish(channel * postoffice.ChannelConfig, resource string,action string, payload []byte) error {
 	mes := postoffice.MQMessage{
-		Provider: &postoffice.Address{
+		Source: &postoffice.Address{
 			Matrix: "POSTOFFICE",
 			Device: kernel.GetHost(),
 		},
-		User:&postoffice.Address{
+		Destination:&postoffice.Address{
 			Matrix:channel.ProductKey,
 			Device:channel.DeviceName,
 		},
@@ -102,7 +102,7 @@ func (kernel *Kernel)Close(deviceName string){
 }
 
 func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
-	val, ok := kernel.clients.Load(msg.Provider.Matrix + "/" + msg.Provider.Device)
+	val, ok := kernel.clients.Load(msg.Source.Matrix + "/" + msg.Source.Device)
 	if ok {
 		client := val.(*mqtt.Client)
 		channel := client.GetChannel()

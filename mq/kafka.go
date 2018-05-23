@@ -84,7 +84,7 @@ func (k * Kafka)Start() error {
 					log.Println(err.Error())
 				}
 				k.kernel.Arrive(&msg)
-				log.Printf("%s.%s=>%s/%s", msg.Resource, msg.Action, msg.Provider.Matrix,msg.Provider.Device)
+				log.Printf("%s.%s=>%s/%s", msg.Resource, msg.Action, msg.Source.Matrix,msg.Source.Device)
 			case kafka.PartitionEOF:
 				fmt.Printf("%% Reached %v\n", e)
 			case kafka.Error:

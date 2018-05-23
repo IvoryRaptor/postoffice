@@ -53,11 +53,11 @@ func (m *Address) GetDevice() string {
 }
 
 type MQMessage struct {
-	Provider *Address `protobuf:"bytes,1,opt,name=provider" json:"provider,omitempty"`
-	User     *Address `protobuf:"bytes,2,opt,name=user" json:"user,omitempty"`
-	Resource string   `protobuf:"bytes,3,opt,name=resource" json:"resource,omitempty"`
-	Action   string   `protobuf:"bytes,4,opt,name=action" json:"action,omitempty"`
-	Payload  []byte   `protobuf:"bytes,5,opt,name=payload,proto3" json:"payload,omitempty"`
+	Source      *Address `protobuf:"bytes,1,opt,name=provider" json:"provider,omitempty"`
+	Destination *Address `protobuf:"bytes,2,opt,name=user" json:"user,omitempty"`
+	Resource    string   `protobuf:"bytes,3,opt,name=resource" json:"resource,omitempty"`
+	Action      string   `protobuf:"bytes,4,opt,name=action" json:"action,omitempty"`
+	Payload     []byte   `protobuf:"bytes,5,opt,name=payload,proto3" json:"payload,omitempty"`
 }
 
 func (m *MQMessage) Reset()                    { *m = MQMessage{} }
@@ -67,14 +67,14 @@ func (*MQMessage) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1
 
 func (m *MQMessage) GetProvider() *Address {
 	if m != nil {
-		return m.Provider
+		return m.Source
 	}
 	return nil
 }
 
 func (m *MQMessage) GetUser() *Address {
 	if m != nil {
-		return m.User
+		return m.Destination
 	}
 	return nil
 }
