@@ -17,6 +17,7 @@ type Kafka struct {
 
 func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
 	deliveryChan := make(chan kafka.Event)
+	fmt.Println("1")
 	err := k.producer.Produce(
 		&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
@@ -24,17 +25,17 @@ func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
 			Value:          payload,
 		},
 		deliveryChan)
-
+	fmt.Println("2")
 	e := <-deliveryChan
 	m := e.(*kafka.Message)
-
+	fmt.Println("3")
 	if m.TopicPartition.Error != nil {
 		fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
 	} else {
 		fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
 			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
 	}
-
+	fmt.Println("4")
 	if err != nil {
 		fmt.Println(topic, err.Error())
 		return err
@@ -45,12 +46,14 @@ func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
 func (k * Kafka)Config(kernel postoffice.IKernel, config *Config) error{
 	k.kernel = kernel
 	var err error = nil
-	k.producer, err = kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": config.Host})
+	host := fmt.Sprintf("%s:%d",config.Host,config.Port)
+	k.producer, err = kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": host})
 	if err != nil {
 		return err
 	}
+
 	t := kafka.ConfigMap{
-		"bootstrap.servers":    config.Host,
+		"bootstrap.servers":    host,
 		"group.id":             "PostOffice",
 		"session.timeout.ms":   6000,
 		"default.topic.config": kafka.ConfigMap{"auto.offset.reset": "earliest"}}
