@@ -25,6 +25,7 @@ func (m *Manager) Config(kernel postoffice.IKernel, config *Config) error {
 	m.kernel = kernel
 	m.oauth = config.OAuth
 	m.zkHost = fmt.Sprintf("%s:%d",config.Zookeeper.Host,config.Zookeeper.Port)
+	println(m.zkHost)
 	m.matrixMap = &sync.Map{}
 	return nil
 }

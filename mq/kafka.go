@@ -17,7 +17,6 @@ type Kafka struct {
 
 func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
 	deliveryChan := make(chan kafka.Event)
-	fmt.Println("1")
 	err := k.producer.Produce(
 		&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
@@ -25,17 +24,14 @@ func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
 			Value:          payload,
 		},
 		deliveryChan)
-	fmt.Println("2")
 	e := <-deliveryChan
 	m := e.(*kafka.Message)
-	fmt.Println("3")
 	if m.TopicPartition.Error != nil {
 		fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
 	} else {
 		fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
 			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
 	}
-	fmt.Println("4")
 	if err != nil {
 		fmt.Println(topic, err.Error())
 		return err
