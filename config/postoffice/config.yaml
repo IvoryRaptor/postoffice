@@ -5,7 +5,7 @@ matrix:
   zookeeper:
 #    host: zookeeper.default
     host: 39.106.153.134
-    port: 32181
+    port: 30181
 redis:
   host: redis.default
   port: 6379

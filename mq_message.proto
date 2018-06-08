@@ -1,5 +1,6 @@
 syntax = "proto3";
 package postoffice;
+import "google/protobuf/timestamp.proto";
 
 message Address {
     string matrix = 1;
@@ -12,4 +13,5 @@ message MQMessage {
     string resource = 3; //资源
     string action = 4; //动作
     bytes payload = 5; //数据
+    google.protobuf.Timestamp time=6;
 }

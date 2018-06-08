@@ -47,7 +47,7 @@ func (m *Manager) Start() error {
 	go func() {
 		for ; ; {
 			newMap := sync.Map{}
-			keys, _, childCh, _ := m.conn.ChildrenW("/postoffice")
+			keys, _, childCh, _ := m.conn.ChildrenW(IOTNN_PATH)
 			for _, key := range keys {
 				matrix, ok := m.matrixMap.Load(key)
 				if ok {

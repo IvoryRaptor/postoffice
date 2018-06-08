@@ -6,20 +6,14 @@ import (
 	"fmt"
 	"log"
 )
-//
-//type Action struct {
-//	run       bool
-//	Name      string
-//	Topic    []string
-//	actionChan chan bool
-//}
-//
+
+const IOTNN_PATH="/iotnn"
 
 func (a *ZkAction) WatchTopic(kernel postoffice.IKernel, matrix string,conn *zk.Conn) {
 	a.run = true
 	go func() {
 		for ; ; {
-			t, _, childCh, _ := conn.ChildrenW(fmt.Sprintf("/postoffice/%s/%s", matrix, a.Name))
+			t, _, childCh, _ := conn.ChildrenW(IOTNN_PATH + "/" + matrix +  "/" + a.Name)
 			a.Topic = t
 			log.Printf("%s %s -> %s", matrix, a.Name, t)
 			select {

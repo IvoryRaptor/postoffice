@@ -34,7 +34,7 @@ func (m *ZkMatrix)GetTopics(action string) ([]string,bool) {
 func (m *ZkMatrix) WatchSecret(kernel postoffice.IKernel,conn *zk.Conn) {
 	go func() {
 		for ; ; {
-			secret, _, childCh, _ := conn.GetW(fmt.Sprintf("/postoffice/%s", m.Name))
+			secret, _, childCh, _ := conn.GetW(IOTNN_PATH + "/" + m.Name)
 			log.Printf("matrix %s: %s", m.Name, secret)
 			select {
 			case ev := <-childCh:
@@ -52,7 +52,7 @@ func (m *ZkMatrix) WatchSecret(kernel postoffice.IKernel,conn *zk.Conn) {
 func (m *ZkMatrix) WatchAction(kernel postoffice.IKernel,conn *zk.Conn) {
 	go func() {
 		for ; ; {
-			actions, _, childCh, _ := conn.ChildrenW(fmt.Sprintf("/postoffice/%s", m.Name))
+			actions, _, childCh, _ := conn.ChildrenW(IOTNN_PATH + "/" + m.Name)
 			newAction := sync.Map{}
 			for _, actionName := range actions {
 				action, ok := m.Action.Load(actionName)
