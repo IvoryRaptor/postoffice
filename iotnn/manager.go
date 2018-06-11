@@ -1,4 +1,4 @@
-package matrix
+package iotnn
 
 import (
 	"github.com/IvoryRaptor/postoffice"
@@ -10,11 +10,11 @@ import (
 )
 
 type Manager struct {
-	kernel    postoffice.IPostOffice
-	oauth     string
-	zkHost    string
-	conn      *zk.Conn
-	matrixMap *sync.Map
+	kernel   postoffice.IPostOffice
+	oauth    string
+	zkHost   string
+	conn     *zk.Conn
+	iotnnMap *sync.Map
 }
 
 type IMatrix interface {
@@ -26,14 +26,14 @@ func (m *Manager) Config(kernel postoffice.IPostOffice, config *Config) error {
 	m.oauth = config.OAuth
 	m.zkHost = fmt.Sprintf("%s:%d",config.Zookeeper.Host,config.Zookeeper.Port)
 	println(m.zkHost)
-	m.matrixMap = &sync.Map{}
+	m.iotnnMap = &sync.Map{}
 	return nil
 }
 
 func (m *Manager) GetMatrix(name string) (IMatrix, bool) {
-	res, ok := m.matrixMap.Load(name)
+	res, ok := m.iotnnMap.Load(name)
 	if ok{
-		return res.(*ZkMatrix), ok
+		return res.(*ZkIOTNN), ok
 	}
 	return nil,ok
 }
@@ -56,23 +56,23 @@ func (m *Manager) Start() error {
 			newMap := sync.Map{}
 			keys, _, childCh, _ := m.conn.ChildrenW(IOTNN_PATH)
 			for _, key := range keys {
-				matrix, ok := m.matrixMap.Load(key)
+				iotnn, ok := m.iotnnMap.Load(key)
 				if ok {
-					newMap.Store(key, matrix)
+					newMap.Store(key, iotnn)
 					newMap.Delete(key)
 				} else {
-					matrix := &ZkMatrix{}
-					matrix.Name = key
-					matrix.WatchSecret(m.kernel, m.conn)
-					matrix.WatchAction(m.kernel, m.conn)
-					newMap.Store(key, matrix)
+					iotnn := &ZkIOTNN{}
+					iotnn.Name = key
+					iotnn.WatchSecret(m.kernel, m.conn)
+					iotnn.WatchAction(m.kernel, m.conn)
+					newMap.Store(key, iotnn)
 				}
 			}
-			m.matrixMap.Range(func(k, v interface{}) bool {
-				v.(*ZkMatrix).StopWatch()
+			m.iotnnMap.Range(func(k, v interface{}) bool {
+				v.(*ZkIOTNN).StopWatch()
 				return true
 			})
-			m.matrixMap = &newMap
+			m.iotnnMap = &newMap
 			select {
 			case ev := <-childCh:
 				if ev.Err != nil {

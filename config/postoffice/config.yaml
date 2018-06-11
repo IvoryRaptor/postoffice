@@ -1,7 +1,7 @@
 auth:
   type: mongodb
   url: mongodb://192.168.41.170:30707
-matrix:
+iotnn:
   zookeeper:
     host: zookeeper.default
     port: 2181
@@ -16,10 +16,6 @@ mq:
   port: 9092
 #  host: 39.106.153.134
 #  port: 30092
-influxdb:
-  host:
-  username:
-  password:
 source:
   - type: mqtt
     ssl: false

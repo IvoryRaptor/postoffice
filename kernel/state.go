@@ -31,7 +31,7 @@ func (po *PostOffice)Config(hostname string)error {
 		return err
 	}
 
-	po.matrixManger.Config(po, &po.config.Matrix)
+	po.iotnnManger.Config(po, &po.config.Matrix)
 
 	log.Println("Config MQ")
 	switch po.config.MQ.Type {
@@ -87,7 +87,7 @@ func (po *PostOffice) Start() error {
 	}
 
 	log.Println("Start Matrix Manager")
-	err = po.matrixManger.Start()
+	err = po.iotnnManger.Start()
 	if err != nil {
 		return err
 	}
@@ -109,5 +109,5 @@ func (po *PostOffice) Stop() {
 		item.Stop()
 	}
 	po.mq.Stop()
-	po.matrixManger.Stop()
+	po.iotnnManger.Stop()
 }

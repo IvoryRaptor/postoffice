@@ -1,4 +1,4 @@
-package matrix
+package iotnn
 
 import (
 	"github.com/IvoryRaptor/postoffice"

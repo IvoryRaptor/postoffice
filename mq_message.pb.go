@@ -30,7 +30,7 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type Address struct {
-	Matrix string `protobuf:"bytes,1,opt,name=matrix" json:"matrix,omitempty"`
+	Matrix string `protobuf:"bytes,1,opt,name=iotnn" json:"iotnn,omitempty"`
 	Device string `protobuf:"bytes,2,opt,name=device" json:"device,omitempty"`
 }
 

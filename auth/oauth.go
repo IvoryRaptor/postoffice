@@ -36,7 +36,7 @@ func (a *OAuth) Authenticate(msg *message.ConnectMessage) error {
 	matrix := helper.Base36.Encode(data[0:15])
 	action := fmt.Sprintf("%x", data[16:])
 
-	//m, ok := a.kernel.GetMatrix(matrix)
+	//m, ok := a.kernel.GetMatrix(iotnn)
 	//if !ok{
 	//	return ErrAuthFailure
 	//}
@@ -68,6 +68,6 @@ func (a *OAuth) Authenticate(msg *message.ConnectMessage) error {
 	//-d "grant_type=authorization_code" \
 	//-d "code=7afb1c55-76e4-4c76-adb7-9d657cb47a27" \
 	//-d "redirect_uri=https://www.example.com"
-	//matrix action
+	//iotnn action
 	return nil
 }

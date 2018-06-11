@@ -6,7 +6,7 @@ import (
 	"syscall"
 	"github.com/IvoryRaptor/postoffice/source"
 	"github.com/IvoryRaptor/postoffice/auth"
-	"github.com/IvoryRaptor/postoffice/matrix"
+	"github.com/IvoryRaptor/postoffice/iotnn"
 	"github.com/IvoryRaptor/postoffice/mqtt"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"sync"
@@ -23,7 +23,7 @@ type PostOffice struct {
 	run           bool
 	source        []source.ISource
 	authenticator auth.IAuthenticator
-	matrixManger  matrix.Manager
+	iotnnManger   iotnn.Manager
 	config        Config
 	mq            mq.IMQ
 	clients       sync.Map
@@ -40,7 +40,7 @@ func (po *PostOffice)GetHost() string{
 }
 
 func (po *PostOffice)GetTopics(matrix string, action string) ([]string, bool){
-	m,ok := po.matrixManger.GetMatrix(matrix)
+	m,ok := po.iotnnManger.GetMatrix(matrix)
 	if !ok{
 		return nil,false
 	}

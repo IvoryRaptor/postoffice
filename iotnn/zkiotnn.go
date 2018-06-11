@@ -1,4 +1,4 @@
-package matrix
+package iotnn
 
 import (
 	"github.com/IvoryRaptor/postoffice"
@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-type ZkMatrix struct {
+type ZkIOTNN struct {
 	Name          string
 	Action        sync.Map
 	secretChan    chan bool
@@ -22,7 +22,7 @@ type ZkAction struct {
 	actionChan chan bool
 }
 
-func (m *ZkMatrix)GetTopics(action string) ([]string,bool) {
+func (m *ZkIOTNN)GetTopics(action string) ([]string,bool) {
 	r, ok := m.Action.Load(action)
 	if !ok {
 		return nil, ok
@@ -31,11 +31,11 @@ func (m *ZkMatrix)GetTopics(action string) ([]string,bool) {
 	return act.Topic, ok
 }
 
-func (m *ZkMatrix) WatchSecret(kernel postoffice.IPostOffice,conn *zk.Conn) {
+func (m *ZkIOTNN) WatchSecret(kernel postoffice.IPostOffice,conn *zk.Conn) {
 	go func() {
 		for ; ; {
 			secret, _, childCh, _ := conn.GetW(IOTNN_PATH + "/" + m.Name)
-			log.Printf("matrix %s: %s", m.Name, secret)
+			log.Printf("iotnn %s: %s", m.Name, secret)
 			select {
 			case ev := <-childCh:
 				if ev.Err != nil {
@@ -49,7 +49,7 @@ func (m *ZkMatrix) WatchSecret(kernel postoffice.IPostOffice,conn *zk.Conn) {
 	}()
 }
 
-func (m *ZkMatrix) WatchAction(kernel postoffice.IPostOffice,conn *zk.Conn) {
+func (m *ZkIOTNN) WatchAction(kernel postoffice.IPostOffice,conn *zk.Conn) {
 	go func() {
 		for ; ; {
 			actions, _, childCh, _ := conn.ChildrenW(IOTNN_PATH + "/" + m.Name)
@@ -85,7 +85,7 @@ func (m *ZkMatrix) WatchAction(kernel postoffice.IPostOffice,conn *zk.Conn) {
 	}()
 }
 
-func (m *ZkMatrix) StopWatch() {
+func (m *ZkIOTNN) StopWatch() {
 	m.secretChan <- true
 	m.actionChan <- true
 }
