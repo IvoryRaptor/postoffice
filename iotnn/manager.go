@@ -59,7 +59,6 @@ func (m *Manager) Start() error {
 				iotnn, ok := m.iotnnMap.Load(key)
 				if ok {
 					newMap.Store(key, iotnn)
-					newMap.Delete(key)
 				} else {
 					iotnn := &ZkIOTNN{}
 					iotnn.Name = key
