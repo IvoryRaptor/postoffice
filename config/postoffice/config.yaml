@@ -3,17 +3,19 @@ auth:
   url: mongodb://192.168.41.170:30707
 matrix:
   zookeeper:
-#    host: zookeeper.default
-    host: 39.106.153.134
-    port: 30181
+    host: zookeeper.default
+    port: 2181
+#    host: 39.106.153.134
+#    port: 30181
 redis:
   host: redis.default
   port: 6379
 mq:
   type: kafka
-#  host: kafka.default
-  host: 39.106.153.134
-  port: 30092
+  host: kafka.default
+  port: 9092
+#  host: 39.106.153.134
+#  port: 30092
 influxdb:
   host:
   username:
