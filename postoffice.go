@@ -14,7 +14,7 @@ type IClient interface {
 	Publish(msg *message.PublishMessage) error
 }
 
-type IKernel interface {
+type IPostOffice interface {
 	GetHost() string
 	Start() error
 	GetTopics(matrix string, action string) ([]string, bool)

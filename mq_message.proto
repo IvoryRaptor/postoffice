@@ -7,6 +7,13 @@ message Address {
     string device = 2;
 }
 
+message SkinPayload{
+    string matrix = 1;
+    string angler = 2;
+    string number = 3;
+    google.protobuf.Timestamp time=4;
+}
+
 message MQMessage {
     Address source = 1; //服务提供者
     Address destination = 2; //服务使用者

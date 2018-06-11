@@ -5,7 +5,7 @@ import (
 )
 
 type IMQ interface {
-	Config(kernel postoffice.IKernel, config *Config) error
+	Config(kernel postoffice.IPostOffice, config *Config) error
 	Start() error
 	Stop()
 	Publish(topic string, actor []byte, payload []byte) error

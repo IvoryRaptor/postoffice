@@ -10,7 +10,7 @@ import (
 )
 
 type Manager struct {
-	kernel    postoffice.IKernel
+	kernel    postoffice.IPostOffice
 	oauth     string
 	zkHost    string
 	conn      *zk.Conn
@@ -21,7 +21,7 @@ type IMatrix interface {
 	GetTopics(action string) ([]string,bool)
 }
 
-func (m *Manager) Config(kernel postoffice.IKernel, config *Config) error {
+func (m *Manager) Config(kernel postoffice.IPostOffice, config *Config) error {
 	m.kernel = kernel
 	m.oauth = config.OAuth
 	m.zkHost = fmt.Sprintf("%s:%d",config.Zookeeper.Host,config.Zookeeper.Port)

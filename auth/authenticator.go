@@ -25,7 +25,7 @@ var (
 )
 
 type IAuthenticator interface {
-	Config(kernel postoffice.IKernel,config *Config) error
+	Config(kernel postoffice.IPostOffice,config *Config) error
 	Start() error
 	Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig
 }

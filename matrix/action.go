@@ -9,7 +9,7 @@ import (
 
 const IOTNN_PATH="/iotnn"
 
-func (a *ZkAction) WatchTopic(kernel postoffice.IKernel, matrix string,conn *zk.Conn) {
+func (a *ZkAction) WatchTopic(kernel postoffice.IPostOffice, matrix string,conn *zk.Conn) {
 	a.run = true
 	go func() {
 		for ; ; {

@@ -6,10 +6,10 @@ import (
 )
 
 type Mock struct {
-	kernel postoffice.IKernel
+	kernel postoffice.IPostOffice
 }
 
-func (a *Mock) Config(kernel postoffice.IKernel,config *Config) error{
+func (a *Mock) Config(kernel postoffice.IPostOffice,config *Config) error{
 	return nil
 }
 

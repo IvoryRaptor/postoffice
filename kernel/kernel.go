@@ -17,7 +17,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-type Kernel struct {
+type PostOffice struct {
 	host          string
 	ConfigFile    string
 	run           bool
@@ -31,31 +31,31 @@ type Kernel struct {
 	redisMutex    sync.Mutex
 }
 
-func (kernel *Kernel)IsRun() bool {
-	return kernel.run
+func (po *PostOffice)IsRun() bool {
+	return po.run
 }
 
-func (kernel *Kernel)GetHost() string{
-	return kernel.host
+func (po *PostOffice)GetHost() string{
+	return po.host
 }
 
-func (kernel *Kernel)GetTopics(matrix string, action string) ([]string, bool){
-	m,ok :=kernel.matrixManger.GetMatrix(matrix)
+func (po *PostOffice)GetTopics(matrix string, action string) ([]string, bool){
+	m,ok := po.matrixManger.GetMatrix(matrix)
 	if !ok{
 		return nil,false
 	}
 	return m.GetTopics(action)
 }
 
-func (kernel *Kernel) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig{
-	return kernel.authenticator.Authenticate(msg)
+func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig{
+	return po.authenticator.Authenticate(msg)
 }
 
-func (kernel *Kernel) Publish(channel * postoffice.ChannelConfig, resource string,action string, payload []byte) error {
+func (po *PostOffice) Publish(channel * postoffice.ChannelConfig, resource string,action string, payload []byte) error {
 	mes := postoffice.MQMessage{
 		Source: &postoffice.Address{
 			Matrix: "POSTOFFICE",
-			Device: kernel.GetHost(),
+			Device: po.GetHost(),
 		},
 		Destination:&postoffice.Address{
 			Matrix:channel.Matrix,
@@ -65,11 +65,11 @@ func (kernel *Kernel) Publish(channel * postoffice.ChannelConfig, resource strin
 		Action:   action,
 		Payload:  payload,
 	}
-	topics, ok := kernel.GetTopics(channel.Matrix, resource+"."+action)
+	topics, ok := po.GetTopics(channel.Matrix, resource+"."+action)
 	if ok {
 		payload, _ := proto.Marshal(&mes)
 		for _, topic := range topics {
-			kernel.mq.Publish(topic, []byte(channel.DeviceName), payload)
+			po.mq.Publish(topic, []byte(channel.DeviceName), payload)
 		}
 	} else {
 		println(channel.Matrix, action, "miss")
@@ -77,32 +77,32 @@ func (kernel *Kernel) Publish(channel * postoffice.ChannelConfig, resource strin
 	return nil
 }
 
-func (kernel *Kernel) WaitStop() {
+func (po *PostOffice) WaitStop() {
 	stopChan := make(chan struct{}, 1)
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	<-signalChan
-	kernel.Stop()
+	po.Stop()
 	stopChan <- struct{}{}
 	os.Exit(0)
 }
 
-func (kernel *Kernel)AddDevice(deviceName string, client postoffice.IClient) {
-	kernel.redisMutex.Lock()
-	kernel.redis.Do("HMSET", "POSTOFFICE", deviceName, kernel.host)
-	kernel.clients.Store(deviceName, client)
-	kernel.redisMutex.Unlock()
+func (po *PostOffice)AddDevice(deviceName string, client postoffice.IClient) {
+	po.redisMutex.Lock()
+	po.redis.Do("HMSET", "POSTOFFICE", deviceName, po.host)
+	po.clients.Store(deviceName, client)
+	po.redisMutex.Unlock()
 }
 
-func (kernel *Kernel)Close(deviceName string){
-	kernel.redisMutex.Lock()
-	kernel.redis.Do("HDEL", "POSTOFFICE", deviceName)
-	kernel.clients.Delete(deviceName)
-	kernel.redisMutex.Unlock()
+func (po *PostOffice)Close(deviceName string){
+	po.redisMutex.Lock()
+	po.redis.Do("HDEL", "POSTOFFICE", deviceName)
+	po.clients.Delete(deviceName)
+	po.redisMutex.Unlock()
 }
 
-func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
-	val, ok := kernel.clients.Load(msg.Source.Matrix + "/" + msg.Source.Device)
+func (po *PostOffice)Arrive(msg *postoffice.MQMessage) {
+	val, ok := po.clients.Load(msg.Source.Matrix + "/" + msg.Source.Device)
 	if ok {
 		client := val.(*mqtt.Client)
 		channel := client.GetChannel()
@@ -131,6 +131,6 @@ func (kernel *Kernel)Arrive(msg *postoffice.MQMessage) {
 	}
 }
 
-func (kernel *Kernel)GetSSL() (crt string, key string) {
-	return kernel.config.SSL.Crt, kernel.config.SSL.Key
+func (po *PostOffice)GetSSL() (crt string, key string) {
+	return po.config.SSL.Crt, po.config.SSL.Key
 }

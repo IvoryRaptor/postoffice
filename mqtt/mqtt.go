@@ -21,7 +21,7 @@ const (
 )
 
 type MQTT struct {
-	kernel postoffice.IKernel
+	kernel postoffice.IPostOffice
 	config map[string]interface{}
 }
 

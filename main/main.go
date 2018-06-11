@@ -9,7 +9,7 @@ import (
 
 
 func main() {
-	k := kernel.Kernel{
+	k := kernel.PostOffice{
 		ConfigFile: "./config/postoffice/config.yaml",
 	}
 	hostname := flag.String("hostname", os.Getenv("hostname"), "is ok")

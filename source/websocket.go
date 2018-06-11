@@ -14,7 +14,7 @@ import (
 
 type WebSocketSource struct {
 	mqtt   mqtt.MQTT
-	kernel postoffice.IKernel
+	kernel postoffice.IPostOffice
 	server * http.Server
 	ssl bool
 }
@@ -73,7 +73,7 @@ func (w *WebSocketConn) SetWriteDeadline(t time.Time) error{
 	return w.conn.SetWriteDeadline(t)
 }
 
-func (s *WebSocketSource) Config(kernel postoffice.IKernel, config map[string]interface{}) error {
+func (s *WebSocketSource) Config(kernel postoffice.IPostOffice, config map[string]interface{}) error {
 	s.kernel = kernel
 	s.mqtt.Config(kernel, config)
 	var upgrader = websocket.Upgrader{

@@ -11,14 +11,14 @@ import (
 
 type MQTTSource struct {
 	mqtt   mqtt.MQTT
-	kernel postoffice.IKernel
+	kernel postoffice.IPostOffice
 	ssl    bool
 	config *tls.Config
 	port   string
 	ln     net.Listener
 }
 
-func (s *MQTTSource) Config(kernel postoffice.IKernel, config map[string]interface{}) error {
+func (s *MQTTSource) Config(kernel postoffice.IPostOffice, config map[string]interface{}) error {
 	s.kernel = kernel
 	s.mqtt.Config(kernel, config)
 	s.ssl = config["ssl"].(bool)

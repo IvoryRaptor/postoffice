@@ -11,10 +11,10 @@ import (
 
 type OAuth struct {
 	url    string
-	kernel postoffice.IKernel
+	kernel postoffice.IPostOffice
 }
 
-func (a *OAuth) Config(kernel postoffice.IKernel,config *Config) error{
+func (a *OAuth) Config(kernel postoffice.IPostOffice,config *Config) error{
 	a.url = config.Url
 	return nil
 }

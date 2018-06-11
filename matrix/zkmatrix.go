@@ -31,7 +31,7 @@ func (m *ZkMatrix)GetTopics(action string) ([]string,bool) {
 	return act.Topic, ok
 }
 
-func (m *ZkMatrix) WatchSecret(kernel postoffice.IKernel,conn *zk.Conn) {
+func (m *ZkMatrix) WatchSecret(kernel postoffice.IPostOffice,conn *zk.Conn) {
 	go func() {
 		for ; ; {
 			secret, _, childCh, _ := conn.GetW(IOTNN_PATH + "/" + m.Name)
@@ -49,7 +49,7 @@ func (m *ZkMatrix) WatchSecret(kernel postoffice.IKernel,conn *zk.Conn) {
 	}()
 }
 
-func (m *ZkMatrix) WatchAction(kernel postoffice.IKernel,conn *zk.Conn) {
+func (m *ZkMatrix) WatchAction(kernel postoffice.IPostOffice,conn *zk.Conn) {
 	go func() {
 		for ; ; {
 			actions, _, childCh, _ := conn.ChildrenW(IOTNN_PATH + "/" + m.Name)

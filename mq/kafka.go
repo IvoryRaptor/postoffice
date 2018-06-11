@@ -10,7 +10,7 @@ import (
 )
 
 type Kafka struct {
-	kernel   postoffice.IKernel
+	kernel   postoffice.IPostOffice
 	producer *kafka.Producer
 	consumer *kafka.Consumer
 }
@@ -39,7 +39,7 @@ func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
 	return nil
 }
 
-func (k * Kafka)Config(kernel postoffice.IKernel, config *Config) error{
+func (k * Kafka)Config(kernel postoffice.IPostOffice, config *Config) error{
 	k.kernel = kernel
 	var err error = nil
 	host := fmt.Sprintf("%s:%d",config.Host,config.Port)

@@ -17,7 +17,7 @@ import (
 )
 
 type Mongo struct {
-	kernel postoffice.IKernel
+	kernel postoffice.IPostOffice
 }
 
 var GlobalMgoSession *mgo.Session
@@ -26,7 +26,7 @@ func CloneSession() *mgo.Session {
 	return GlobalMgoSession.Clone()
 }
 
-func (a *Mongo) Config(kernel postoffice.IKernel,config *Config) error{
+func (a *Mongo) Config(kernel postoffice.IPostOffice,config *Config) error{
 	globalMgoSession, err := mgo.DialWithTimeout(config.Url, 10 * time.Second)
 	if err != nil {
 		panic(err)

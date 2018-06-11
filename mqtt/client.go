@@ -101,7 +101,7 @@ type Client struct {
 	subs    []interface{}
 	qoss    []byte
 	rmsgs   []*message.PublishMessage
-	kernel  postoffice.IKernel
+	kernel  postoffice.IPostOffice
 	channel *postoffice.ChannelConfig
 }
 
