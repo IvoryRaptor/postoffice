@@ -44,6 +44,13 @@ func (m *Manager) Start() error {
 	if err != nil {
 		return err
 	}
+
+	flags := int32(0)
+	acl := zk.WorldACL(zk.PermAll)
+	m.conn.Create("/matrixs", []byte{}, flags, acl)
+	m.conn.Create("/matrixs/default", []byte{}, flags, acl)
+	m.conn.Create(fmt.Sprintf("/matrixs/default/postoffice-%s", m.kernel.GetHost()), []byte{}, flags, acl)
+
 	go func() {
 		for ; ; {
 			newMap := sync.Map{}
