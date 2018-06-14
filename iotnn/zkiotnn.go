@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 	"github.com/IvoryRaptor/dragonfly"
-	"github.com/IvoryRaptor/postoffice2/iotnn"
 )
 
 type ZkIotNN struct {
@@ -17,11 +16,6 @@ type ZkIotNN struct {
 	iotnnMap *sync.Map
 }
 
-type IIotNN interface {
-	dragonfly.IService
-	GetMatrix(matrix string) (iotnn.IMatrix,bool)
-}
-
 func (m *ZkIotNN) Config(kernel dragonfly.IKernel, config map[interface {}]interface{}) error {
 	m.kernel = kernel.(postoffice.IPostOffice)
 	m.url = fmt.Sprintf("%s:%d", config["host"].(string), config["port"].(int))
@@ -29,7 +23,7 @@ func (m *ZkIotNN) Config(kernel dragonfly.IKernel, config map[interface {}]inter
 	return nil
 }
 
-func (m *ZkIotNN) GetMatrix(name string) (iotnn.IMatrix, bool) {
+func (m *ZkIotNN) GetMatrix(name string) (IMatrix, bool) {
 	res, ok := m.iotnnMap.Load(name)
 	if ok{
 		return res.(*ZkMatrix), ok
