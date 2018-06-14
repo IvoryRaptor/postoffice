@@ -16,10 +16,6 @@ type Kafka struct {
 	consumer *kafka.Consumer
 }
 
-func (k * Kafka)GetName() string{
-	return "mq"
-}
-
 func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
 	deliveryChan := make(chan kafka.Event)
 	err := k.producer.Produce(

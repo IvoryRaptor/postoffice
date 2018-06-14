@@ -19,10 +19,6 @@ func (m *Mock) Start() error{
 	return nil
 }
 
-func (m *Mock)GetName() string {
-	return "auth"
-}
-
 func (m *Mock) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
 	config := postoffice.ChannelConfig{
 		//ClientId:   string(msg.ClientId()),

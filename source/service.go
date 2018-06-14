@@ -14,10 +14,6 @@ type Service struct {
 	config map[interface {}]interface{}
 }
 
-func (s * Service)GetName() string{
-	return "source"
-}
-
 func (s * Service)Start() error {
 	for _, channel := range s.channels {
 		err := channel.Start()
