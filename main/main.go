@@ -1,26 +1,41 @@
 package main
 
 import (
-	"github.com/IvoryRaptor/postoffice/kernel"
-	"log"
-	"os"
 	"flag"
+	"os"
+	"github.com/IvoryRaptor/postoffice/kernel"
+	"github.com/IvoryRaptor/dragonfly"
+	"github.com/IvoryRaptor/postoffice/source"
+	"log"
+	"github.com/IvoryRaptor/postoffice/auth"
+	"github.com/IvoryRaptor/postoffice/iotnn"
+	"github.com/IvoryRaptor/postoffice/mq"
 )
 
-
 func main() {
-	k := kernel.PostOffice{
-		ConfigFile: "./config/postoffice/config.yaml",
-	}
+	k := kernel.PostOffice{}
+	k.New("postoffice")
+
 	hostname := flag.String("hostname", os.Getenv("hostname"), "is ok")
 	flag.Parse()
-	err := k.Config(*hostname)
+	k.Set("host", *hostname)
+
+	err := dragonfly.Builder(
+		&k,
+		[]dragonfly.IServiceFactory{
+			&source.Factory{},
+			&auth.Factory{},
+			&mq.Factory{},
+			&dragonfly.RedisFactory{},
+			&iotnn.Factory{},
+		})
+	k.SetFields()
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatal(err.Error())
 	}
 	err = k.Start()
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatal(err.Error())
 	}
 	k.WaitStop()
 }

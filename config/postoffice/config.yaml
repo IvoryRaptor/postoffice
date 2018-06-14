@@ -1,12 +1,11 @@
 auth:
   type: mongodb
-  url: mongodb://192.168.41.170:30707
+  host: mongodb.default
+  port: 30707
 iotnn:
-  zookeeper:
-    host: zookeeper.default
-    port: 2181
-#    host: 39.106.153.134
-#    port: 30181
+  type: zookeeper
+  host: zookeeper.default
+  port: 2181
 redis:
   host: redis.default
   port: 6379
@@ -14,26 +13,18 @@ mq:
   type: kafka
   host: kafka.default
   port: 9092
-#  host: 39.106.153.134
-#  port: 30092
 source:
+  ssl:
+    crt: ./cert/postoffice.crt
+    key: ./cert/postoffice.key
+  keepAlive: 300
+  connectTimeout: 2
+  ackTimeout: 20
+  timeoutRetries: 3
+  channels:
   - type: mqtt
     ssl: false
     port: 1883
-    keepAlive: 300
-    connectTimeout: 2
-    ackTimeout: 20
-    timeoutRetries: 3
   - type: websocket
     ssl: false
     port: 8080
-    keepAlive: 300
-    connectTimeout: 2
-    ackTimeout: 20
-    timeoutRetries: 3
-  - type: coap
-    ssl: false
-    port: 8080
-ssl:
-  crt: ./cert/postoffice.crt
-  key: ./cert/postoffice.key

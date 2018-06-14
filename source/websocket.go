@@ -12,11 +12,12 @@ import (
 	"github.com/IvoryRaptor/postoffice/mqtt"
 )
 
-type WebSocketSource struct {
-	mqtt   mqtt.MQTT
+type WebSocketChannel struct {
+	mqtt.MQTT
 	kernel postoffice.IPostOffice
 	server * http.Server
 	ssl bool
+	service *Service
 }
 
 type WebSocketConn struct {
@@ -73,9 +74,14 @@ func (w *WebSocketConn) SetWriteDeadline(t time.Time) error{
 	return w.conn.SetWriteDeadline(t)
 }
 
-func (s *WebSocketSource) Config(kernel postoffice.IPostOffice, config map[string]interface{}) error {
-	s.kernel = kernel
-	s.mqtt.Config(kernel, config)
+func (s *WebSocketChannel) Config(service *Service, config map[interface{}]interface{}) error {
+	s.service = service
+	s.Kernel = service.kernel.(postoffice.IPostOffice)
+	s.KeepAlive = service.config["keepAlive"].(int)
+	s.ConnectTimeout = service.config["connectTimeout"].(int)
+	s.AckTimeout = service.config["ackTimeout"].(int)
+	s.TimeoutRetries = service.config["timeoutRetries"].(int)
+
 	var upgrader = websocket.Upgrader{
 		Subprotocols: []string{"mqttv3.1", "mqtt", "mqttv3.1.1"},
 		CheckOrigin: func(r *http.Request) bool {
@@ -91,24 +97,22 @@ func (s *WebSocketSource) Config(kernel postoffice.IPostOffice, config map[strin
 			log.Print("upgrade:", err)
 			return
 		}
-		c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(config["connectTimeout"].(int))))
-		s.mqtt.AddChannel(&WebSocketConn{conn: c})
+		c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(s.ConnectTimeout)))
+		s.AddChannel(&WebSocketConn{conn: c})
 	})
 	return nil
 }
 
-func (s *WebSocketSource) Start() error {
-	err:= s.mqtt.Start()
-	if err != nil {
-		return err
-	}
+func (s *WebSocketChannel) Start() error {
 	go func() {
 		if s.ssl {
-			crt, key := s.kernel.GetSSL()
+			crt, key := s.service.crt, s.service.key
+			log.Printf("Listen WebSocket SSL Port%s", s.server.Addr)
 			if err := s.server.ListenAndServeTLS(crt, key); err != nil {
 				log.Printf("Httpserver: ListenAndServe() error: %s", err)
 			}
 		} else {
+			log.Printf("Listen WebSocket Port%s", s.server.Addr)
 			if err := s.server.ListenAndServe(); err != nil {
 				log.Printf("Httpserver: ListenAndServe() error: %s", err)
 			}
@@ -117,7 +121,6 @@ func (s *WebSocketSource) Start() error {
 	return nil
 }
 
-func (s *WebSocketSource) Stop(){
-	s.mqtt.Stop()
+func (s *WebSocketChannel) Stop(){
 	s.server.Shutdown(nil)
 }

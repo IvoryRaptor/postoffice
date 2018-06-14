@@ -262,11 +262,9 @@ func (c *Client) subscribe(msg *message.SubscribeMessage, onComplete OnCompleteF
 		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)
 	}
 
-	var onc OnCompleteFunc = func(msg, ack message.Message, err error) error {
+	var _ OnCompleteFunc = func(msg, ack message.Message, err error) error {
 		onComplete := onComplete
-		onPublish := onPublish
-
-		println(onPublish)
+		//onPublish := onPublish
 		if err != nil {
 			if onComplete != nil {
 				return onComplete(msg, ack, err)
@@ -329,7 +327,6 @@ func (c *Client) subscribe(msg *message.SubscribeMessage, onComplete OnCompleteF
 
 		return err2
 	}
-	println(onc)
 	return nil
 	//return c.sess.Suback.Wait(msg, onc)
 }
@@ -339,8 +336,7 @@ func (c *Client) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnCompl
 	if err != nil {
 		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)
 	}
-
-	var onc OnCompleteFunc = func(msg, ack message.Message, err error) error {
+	var _ OnCompleteFunc = func(msg, ack message.Message, err error) error {
 		onComplete := onComplete
 
 		if err != nil {
@@ -392,7 +388,6 @@ func (c *Client) unsubscribe(msg *message.UnsubscribeMessage, onComplete OnCompl
 
 		return err2
 	}
-	println(onc)
 	return nil
 	//return c.sess.Unsuback.Wait(msg, onc)
 }

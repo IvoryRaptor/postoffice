@@ -1,65 +1,58 @@
 package kernel
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
-	"github.com/IvoryRaptor/postoffice/source"
-	"github.com/IvoryRaptor/postoffice/auth"
-	"github.com/IvoryRaptor/postoffice/iotnn"
-	"github.com/IvoryRaptor/postoffice/mqtt"
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"sync"
 	"fmt"
-	"github.com/golang/protobuf/proto"
+	"sync"
+	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mq"
-	"github.com/garyburd/redigo/redis"
+	"github.com/IvoryRaptor/postoffice/auth"
+	"github.com/IvoryRaptor/postoffice/iotnn"
+	"github.com/golang/protobuf/proto"
+	"github.com/IvoryRaptor/postoffice/mqtt/message"
+	"github.com/IvoryRaptor/postoffice/mqtt"
+	"log"
 )
 
 type PostOffice struct {
-	host          string
-	ConfigFile    string
-	run           bool
-	source        []source.ISource
-	authenticator auth.IAuthenticator
-	iotnnManger   iotnn.Manager
-	config        Config
-	mq            mq.IMQ
-	clients       sync.Map
-	redis         redis.Conn
-	redisMutex    sync.Mutex
+	dragonfly.Kernel
+	auth    auth.IAuthenticator
+	clients sync.Map
+	iotnn   iotnn.IIotNN
+	mq      mq.IMQ
+	redis   *dragonfly.Redis
 }
 
-func (po *PostOffice)IsRun() bool {
-	return po.run
+func (po *PostOffice) SetFields() {
+	po.auth = po.GetService("auth").(auth.IAuthenticator)
+	po.clients = sync.Map{}
+	po.iotnn = po.GetService("iotnn").(iotnn.IIotNN)
+	po.mq = po.GetService("mq").(mq.IMQ)
+	po.redis = po.GetService("redis").(*dragonfly.Redis)
 }
 
-func (po *PostOffice)GetHost() string{
-	return po.host
-}
 
 func (po *PostOffice)GetTopics(matrix string, action string) ([]string, bool){
-	m,ok := po.iotnnManger.GetMatrix(matrix)
-	if !ok{
+	m,h := po.iotnn.GetMatrix(matrix)
+	if !h{
 		return nil,false
 	}
 	return m.GetTopics(action)
 }
 
 func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig{
-	return po.authenticator.Authenticate(msg)
+	return po.GetService("auth").(auth.IAuthenticator).Authenticate(msg)
 }
 
 func (po *PostOffice) Publish(channel * postoffice.ChannelConfig, resource string,action string, payload []byte) error {
 	mes := postoffice.MQMessage{
 		Source: &postoffice.Address{
 			Matrix: "POSTOFFICE",
-			Device: po.GetHost(),
+			Device: po.Get("host").(string),
 		},
-		Destination:&postoffice.Address{
-			Matrix:channel.Matrix,
-			Device:channel.DeviceName,
+		Destination: &postoffice.Address{
+			Matrix: channel.Matrix,
+			Device: channel.DeviceName,
 		},
 		Resource: resource,
 		Action:   action,
@@ -72,33 +65,19 @@ func (po *PostOffice) Publish(channel * postoffice.ChannelConfig, resource strin
 			po.mq.Publish(topic, []byte(channel.DeviceName), payload)
 		}
 	} else {
-		println(channel.Matrix, action, "miss")
+		log.Printf("MISS Matrix:%s Resource:%s Action:%s", channel.Matrix, resource, action)
 	}
 	return nil
 }
 
-func (po *PostOffice) WaitStop() {
-	stopChan := make(chan struct{}, 1)
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-	<-signalChan
-	po.Stop()
-	stopChan <- struct{}{}
-	os.Exit(0)
-}
-
 func (po *PostOffice)AddDevice(deviceName string, client postoffice.IClient) {
-	po.redisMutex.Lock()
-	po.redis.Do("HMSET", "POSTOFFICE", deviceName, po.host)
+	po.redis.Do("HMSET", "POSTOFFICE", deviceName, po.Get("host"))
 	po.clients.Store(deviceName, client)
-	po.redisMutex.Unlock()
 }
 
 func (po *PostOffice)Close(deviceName string){
-	po.redisMutex.Lock()
 	po.redis.Do("HDEL", "POSTOFFICE", deviceName)
 	po.clients.Delete(deviceName)
-	po.redisMutex.Unlock()
 }
 
 func (po *PostOffice)Arrive(msg *postoffice.MQMessage) {
@@ -127,10 +106,6 @@ func (po *PostOffice)Arrive(msg *postoffice.MQMessage) {
 			client.Publish(pus)
 		}
 	}else{
-		println("miss")
+		log.Printf("MISS Matrix:%s Resource:%s Action:%s\n",msg.Source.Matrix, msg.Resource, msg.Action)
 	}
-}
-
-func (po *PostOffice)GetSSL() (crt string, key string) {
-	return po.config.SSL.Crt, po.config.SSL.Key
 }

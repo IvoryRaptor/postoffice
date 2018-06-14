@@ -1,12 +1,10 @@
 package mq
 
 import (
-	"github.com/IvoryRaptor/postoffice"
+	"github.com/IvoryRaptor/dragonfly"
 )
 
 type IMQ interface {
-	Config(kernel postoffice.IPostOffice, config *Config) error
-	Start() error
-	Stop()
+	dragonfly.IService
 	Publish(topic string, actor []byte, payload []byte) error
 }

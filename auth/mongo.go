@@ -4,7 +4,6 @@ import (
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"strings"
-	"gopkg.in/mgo.v2"
 	"time"
 	"gopkg.in/mgo.v2/bson"
 	"crypto/sha1"
@@ -14,32 +13,12 @@ import (
 	"fmt"
 	"crypto/hmac"
 	"math/rand"
+	"github.com/IvoryRaptor/dragonfly"
+	"log"
 )
 
-type Mongo struct {
-	kernel postoffice.IPostOffice
-}
-
-var GlobalMgoSession *mgo.Session
-
-func CloneSession() *mgo.Session {
-	return GlobalMgoSession.Clone()
-}
-
-func (a *Mongo) Config(kernel postoffice.IPostOffice,config *Config) error{
-	globalMgoSession, err := mgo.DialWithTimeout(config.Url, 10 * time.Second)
-	if err != nil {
-		panic(err)
-	}
-	GlobalMgoSession=globalMgoSession
-	GlobalMgoSession.SetMode(mgo.Monotonic, true)
-	//default is 4096
-	GlobalMgoSession.SetPoolLimit(300)
-	return nil
-}
-
-func (a *Mongo) Start() error{
-	return nil
+type MongoAuth struct {
+	dragonfly.Mongo
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -52,12 +31,12 @@ func randSeq(n int) string {
 	return string(b)
 }
 
-func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
+func (m *MongoAuth) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
 	clientId := string(msg.ClientId())
 	deviceName := ""
 	productKey := ""
 
-	session := CloneSession() //调用这个获得session
+	session := m.GetSession() //调用这个获得session
 	defer session.Close()     //一定要记得释放
 	c := session.DB("tortoise").C("oauth_devices")
 
@@ -81,9 +60,9 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 			"deviceName": deviceName,
 		}
 		data := bson.M{}
-		err := c.Find(bson.M{"iotnn": productKey, "deviceName": deviceName}).One(data)
+		err := c.Find(bson.M{"matrix": productKey, "deviceName": deviceName}).One(data)
 		if err != nil {
-			println(err.Error())
+			log.Printf("Not found Matrix: %s DeviceName: %s", productKey, deviceName)
 			return nil
 		}
 		keys := []string{"productKey", "deviceName", "clientId"}
@@ -99,7 +78,8 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 				case "hmacmd5":
 					h = hmac.New(md5.New, []byte(data["secret"].(string)))
 				default:
-					println(v[1])
+					log.Printf("Unknown signmethod %s", v[1])
+					return nil
 				}
 			case "timestamp":
 				keys = append(keys, v[0])
@@ -108,7 +88,6 @@ func (a *Mongo) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelCon
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			println(key + "=" + params[key])
 			h.Write([]byte(key))
 			h.Write([]byte(params[key]))
 		}

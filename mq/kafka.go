@@ -7,12 +7,17 @@ import (
 	"fmt"
 	"os"
 	"log"
+	"github.com/IvoryRaptor/dragonfly"
 )
 
 type Kafka struct {
 	kernel   postoffice.IPostOffice
 	producer *kafka.Producer
 	consumer *kafka.Consumer
+}
+
+func (k * Kafka)GetName() string{
+	return "mq"
 }
 
 func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
@@ -39,10 +44,10 @@ func (k * Kafka)Publish(topic string,actor []byte,payload []byte) error {
 	return nil
 }
 
-func (k * Kafka)Config(kernel postoffice.IPostOffice, config *Config) error{
-	k.kernel = kernel
+func (k * Kafka)Config(kernel dragonfly.IKernel, config map[interface{}]interface{}) error{
+	k.kernel = kernel.(postoffice.IPostOffice)
 	var err error = nil
-	host := fmt.Sprintf("%s:%d",config.Host,config.Port)
+	host := fmt.Sprintf("%s:%d",config["host"],config["port"])
 	k.producer, err = kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": host})
 	if err != nil {
 		return err
@@ -63,7 +68,7 @@ func (k * Kafka)Config(kernel postoffice.IPostOffice, config *Config) error{
 
 func (k * Kafka)Start() error {
 	log.Printf("mq start")
-	err := k.consumer.SubscribeTopics([]string{fmt.Sprintf("postoffice-%s", k.kernel.GetHost())}, nil)
+	err := k.consumer.SubscribeTopics([]string{fmt.Sprintf("postoffice-%s", k.kernel.Get("host"))}, nil)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create consumer: %s\n", err)
@@ -98,4 +103,5 @@ func (k * Kafka)Start() error {
 }
 
 func (k * Kafka)Stop(){
+	k.kernel.RemoveService(k)
 }

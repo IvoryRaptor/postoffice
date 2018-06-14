@@ -191,26 +191,14 @@ func (c *Client) processSubscribe(msg *message.SubscribeMessage) error {
 	// Subscribe to the different topics
 	var retcodes []byte
 
-	topics := msg.Topics()
-	qos := msg.Qos()
+	//topics := msg.Topics()
+	//qos := msg.Qos()
 
 	c.rmsgs = c.rmsgs[0:0]
 
-	for i, t := range topics {
-		//rqos, err := c.topicsMgr.Subscribe(t, qos[i], &c.onpub)
-		//if err != nil {
-		//	return err
-		//}
-		//c.sess.AddTopic(string(t), qos[i])
-		//
-		//retcodes = append(retcodes, rqos)
-		//
-		//// yeah I am not checking errors here. If there's an error we don't want the
-		//// subscription to stop, just let it go.
-		//c.topicsMgr.Retained(t, &c.rmsgs)
-		println(string(qos), i, string(t))
-		//glog.Debugf("(%s) topic = %s, retained count = %d", c.cid(), string(t), len(c.rmsgs))
-	}
+	//for i, t := range topics {
+	//	println(string(qos), i, string(t))
+	//}
 
 	if err := resp.AddReturnCodes(retcodes); err != nil {
 		return err

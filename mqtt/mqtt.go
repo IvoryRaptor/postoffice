@@ -21,8 +21,11 @@ const (
 )
 
 type MQTT struct {
-	kernel postoffice.IPostOffice
-	config map[string]interface{}
+	Kernel         postoffice.IPostOffice
+	ConnectTimeout int
+	AckTimeout     int
+	TimeoutRetries int
+	KeepAlive      int
 }
 
 func (m * MQTT)AddChannel(conn net.Conn) (err error) {
@@ -44,7 +47,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 		return err
 	}
 	// Authenticate the user, if error, return error and exit
-	channel := m.kernel.Authenticate(req)
+	channel := m.Kernel.Authenticate(req)
 	if channel == nil {
 		resp.SetReturnCode(message.ErrBadUsernameOrPassword)
 		resp.SetSessionPresent(false)
@@ -52,7 +55,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 		return err
 	}
 
-	m.kernel.Publish(channel, "device", "online", []byte(channel.Token))
+	m.Kernel.Publish(channel, "device", "online", []byte(channel.Token))
 	fmt.Printf("%s device online\n", string([]byte(channel.DeviceName)))
 	if req.KeepAlive() == 0 {
 		req.SetKeepAlive(minKeepAlive)
@@ -60,11 +63,11 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 
 	svc := &Client{
 		keepAlive:      int(req.KeepAlive()),
-		connectTimeout: m.config["connectTimeout"].(int),
-		ackTimeout:     m.config["ackTimeout"].(int),
-		timeoutRetries: m.config["timeoutRetries"].(int),
+		connectTimeout: m.ConnectTimeout,
+		ackTimeout:     m.AckTimeout,
+		timeoutRetries: m.TimeoutRetries,
 		conn:           conn,
-		kernel:         m.kernel,
+		kernel:         m.Kernel,
 		channel:        channel,
 	}
 	resp.SetReturnCode(message.ConnectionAccepted)
@@ -76,7 +79,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 	svc.inStat.increment(int64(req.Len()))
 	svc.outStat.increment(int64(resp.Len()))
 
-	m.kernel.AddDevice(channel.Matrix + "/" + channel.DeviceName, svc)
+	m.Kernel.AddDevice(channel.Matrix + "/" + channel.DeviceName, svc)
 	if err := svc.start(); err != nil {
 		svc.Stop()
 		return err
