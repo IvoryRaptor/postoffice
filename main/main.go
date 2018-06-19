@@ -8,7 +8,6 @@ import (
 	"github.com/IvoryRaptor/postoffice/source"
 	"log"
 	"github.com/IvoryRaptor/postoffice/auth"
-	"github.com/IvoryRaptor/postoffice/iotnn"
 	"github.com/IvoryRaptor/postoffice/mq"
 )
 
@@ -27,7 +26,7 @@ func main() {
 			&auth.Factory{},
 			&mq.Factory{},
 			&dragonfly.RedisFactory{},
-			&iotnn.Factory{},
+			&dragonfly.ZookeeperFactory{},
 		})
 	k.SetFields()
 	if err != nil {

@@ -17,7 +17,7 @@ type IClient interface {
 
 type IPostOffice interface {
 	dragonfly.IKernel
-	GetTopics(matrix string, action string) ([]string, bool)
+	GetTopics(matrix string, action string) []string
 	Authenticate(msg *message.ConnectMessage) *ChannelConfig
 	Publish(channel *ChannelConfig, resource string, action string, payload []byte) error
 	AddDevice(device string, client IClient)

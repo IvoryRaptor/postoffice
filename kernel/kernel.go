@@ -7,7 +7,6 @@ import (
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mq"
 	"github.com/IvoryRaptor/postoffice/auth"
-	"github.com/IvoryRaptor/postoffice/iotnn"
 	"github.com/golang/protobuf/proto"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"github.com/IvoryRaptor/postoffice/mqtt"
@@ -16,35 +15,34 @@ import (
 
 type PostOffice struct {
 	dragonfly.Kernel
-	auth    auth.IAuthenticator
-	clients sync.Map
-	iotnn   iotnn.IIotNN
-	mq      mq.IMQ
-	redis   *dragonfly.Redis
+	auth      auth.IAuthenticator
+	clients   sync.Map
+	zookeeper *dragonfly.Zookeeper
+	mq        mq.IMQ
+	redis     *dragonfly.Redis
 }
 
 func (po *PostOffice) SetFields() {
 	po.auth = po.GetService("auth").(auth.IAuthenticator)
 	po.clients = sync.Map{}
-	po.iotnn = po.GetService("iotnn").(iotnn.IIotNN)
 	po.mq = po.GetService("mq").(mq.IMQ)
 	po.redis = po.GetService("redis").(*dragonfly.Redis)
+	po.zookeeper = po.GetService("zookeeper").(*dragonfly.Zookeeper)
 }
 
-
-func (po *PostOffice)GetTopics(matrix string, action string) ([]string, bool){
-	m,h := po.iotnn.GetMatrix(matrix)
-	if !h{
-		return nil,false
+func (po *PostOffice) GetTopics(matrix string, action string) []string {
+	m := po.zookeeper.GetChilde(matrix)
+	if m == nil {
+		return nil
 	}
-	return m.GetTopics(action)
+	return m.GetKeys()
 }
 
-func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig{
+func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
 	return po.GetService("auth").(auth.IAuthenticator).Authenticate(msg)
 }
 
-func (po *PostOffice) Publish(channel * postoffice.ChannelConfig, resource string,action string, payload []byte) error {
+func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string, action string, payload []byte) error {
 	mes := postoffice.MQMessage{
 		Source: &postoffice.Address{
 			Matrix: "POSTOFFICE",
@@ -58,8 +56,8 @@ func (po *PostOffice) Publish(channel * postoffice.ChannelConfig, resource strin
 		Action:   action,
 		Payload:  payload,
 	}
-	topics, ok := po.GetTopics(channel.Matrix, resource+"."+action)
-	if ok {
+	topics := po.GetTopics(channel.Matrix, resource+"."+action)
+	if topics != nil {
 		payload, _ := proto.Marshal(&mes)
 		for _, topic := range topics {
 			po.mq.Publish(topic, []byte(channel.DeviceName), payload)
@@ -70,17 +68,17 @@ func (po *PostOffice) Publish(channel * postoffice.ChannelConfig, resource strin
 	return nil
 }
 
-func (po *PostOffice)AddDevice(deviceName string, client postoffice.IClient) {
+func (po *PostOffice) AddDevice(deviceName string, client postoffice.IClient) {
 	po.redis.Do("HMSET", "POSTOFFICE", deviceName, po.Get("host"))
 	po.clients.Store(deviceName, client)
 }
 
-func (po *PostOffice)Close(deviceName string){
+func (po *PostOffice) Close(deviceName string) {
 	po.redis.Do("HDEL", "POSTOFFICE", deviceName)
 	po.clients.Delete(deviceName)
 }
 
-func (po *PostOffice)Arrive(msg *postoffice.MQMessage) {
+func (po *PostOffice) Arrive(msg *postoffice.MQMessage) {
 	val, ok := po.clients.Load(msg.Source.Matrix + "/" + msg.Source.Device)
 	if ok {
 		client := val.(*mqtt.Client)
@@ -105,7 +103,7 @@ func (po *PostOffice)Arrive(msg *postoffice.MQMessage) {
 			pus.SetPayload(msg.Payload)
 			client.Publish(pus)
 		}
-	}else{
-		log.Printf("MISS Matrix:%s Resource:%s Action:%s\n",msg.Source.Matrix, msg.Resource, msg.Action)
+	} else {
+		log.Printf("MISS Matrix:%s Resource:%s Action:%s\n", msg.Source.Matrix, msg.Resource, msg.Action)
 	}
 }

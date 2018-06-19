@@ -2,10 +2,12 @@ auth:
   type: mongodb
   host: mongodb.default
   port: 30707
-iotnn:
+zookeeper:
   type: zookeeper
   host: zookeeper.default
   port: 2181
+  path: /iotnn
+  level: 3
 redis:
   host: redis.default
   port: 6379
