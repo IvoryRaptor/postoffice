@@ -1,17 +1,9 @@
 syntax = "proto3";
 package postoffice;
-import "google/protobuf/timestamp.proto";
 
 message Address {
     string matrix = 1;
     string device = 2;
-}
-
-message SkinPayload{
-    string matrix = 1;
-    string angler = 2;
-    string number = 3;
-    google.protobuf.Timestamp time=4;
 }
 
 message MQMessage {
@@ -20,5 +12,5 @@ message MQMessage {
     string resource = 3; //资源
     string action = 4; //动作
     bytes payload = 5; //数据
-    google.protobuf.Timestamp time=6;
+    int64 time=6;
 }

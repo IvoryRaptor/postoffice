@@ -5,12 +5,12 @@ import (
 	"sync"
 	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/postoffice"
-	"github.com/IvoryRaptor/postoffice/mq"
 	"github.com/IvoryRaptor/postoffice/auth"
 	"github.com/golang/protobuf/proto"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"github.com/IvoryRaptor/postoffice/mqtt"
 	"log"
+	"github.com/IvoryRaptor/dragonfly/mq"
 )
 
 type PostOffice struct {
@@ -82,7 +82,14 @@ func (po *PostOffice) Close(deviceName string) {
 	po.clients.Delete(deviceName)
 }
 
-func (po *PostOffice) Arrive(msg *postoffice.MQMessage) {
+func (po *PostOffice) Arrive(data []byte) {
+	msg := postoffice.MQMessage{}
+	err := proto.Unmarshal(data, &msg)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	log.Printf("%s.%s=>%s/%s", msg.Resource, msg.Action, msg.Source.Matrix,msg.Source.Device)
 	val, ok := po.clients.Load(msg.Source.Matrix + "/" + msg.Source.Device)
 	if ok {
 		client := val.(*mqtt.Client)
