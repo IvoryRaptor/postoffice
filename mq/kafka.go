@@ -64,7 +64,7 @@ func (k * Kafka)Config(kernel dragonfly.IKernel, config map[interface{}]interfac
 
 func (k * Kafka)Start() error {
 	log.Printf("mq start")
-	err := k.consumer.SubscribeTopics([]string{fmt.Sprintf("postoffice-%s", k.kernel.Get("host"))}, nil)
+	err := k.consumer.SubscribeTopics([]string{fmt.Sprintf("%s.postoffice-%s", k.kernel.Get("matrix"), k.kernel.Get("host"))}, nil)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create consumer: %s\n", err)

@@ -19,6 +19,8 @@ func main() {
 	flag.Parse()
 	k.Set("host", *hostname)
 
+	k.Set("matrix","default")
+
 	err := dragonfly.Builder(
 		&k,
 		[]dragonfly.IServiceFactory{

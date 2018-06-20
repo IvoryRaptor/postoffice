@@ -35,6 +35,10 @@ func (po *PostOffice) GetTopics(matrix string, action string) []string {
 	if m == nil {
 		return nil
 	}
+	m = m.GetChilde(action)
+	if m == nil {
+		return nil
+	}
 	return m.GetKeys()
 }
 
