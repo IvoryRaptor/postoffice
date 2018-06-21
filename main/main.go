@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"os"
-	"github.com/IvoryRaptor/postoffice/kernel"
-	"github.com/IvoryRaptor/dragonfly"
-	"github.com/IvoryRaptor/postoffice/source"
 	"log"
+	"github.com/IvoryRaptor/dragonfly"
+	"github.com/IvoryRaptor/postoffice/kernel"
+	"github.com/IvoryRaptor/postoffice/source"
 	"github.com/IvoryRaptor/postoffice/auth"
-	"github.com/IvoryRaptor/dragonfly/mq"
+	"github.com/IvoryRaptor/postoffice/mq"
 )
 
 func main() {
