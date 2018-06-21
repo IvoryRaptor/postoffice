@@ -1,8 +1,8 @@
 package postoffice
 
 import (
-	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
+	"github.com/IvoryRaptor/dragonfly/mq"
 )
 
 type ChannelConfig struct{
@@ -16,7 +16,7 @@ type IClient interface {
 }
 
 type IPostOffice interface {
-	dragonfly.IKernel
+	mq.IArrive
 	GetTopics(matrix string, action string) []string
 	Authenticate(msg *message.ConnectMessage) *ChannelConfig
 	Publish(channel *ChannelConfig, resource string, action string, payload []byte) error
