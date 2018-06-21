@@ -49,8 +49,8 @@ func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string, action string, payload []byte) error {
 	mes := postoffice.MQMessage{
 		Source: &postoffice.Address{
-			Matrix: "POSTOFFICE",
-			Device: po.Get("host").(string),
+			Matrix: po.Get("matrix").(string),
+			Device: po.Get("angler").(string),
 		},
 		Destination: &postoffice.Address{
 			Matrix: channel.Matrix,
@@ -73,7 +73,7 @@ func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string
 }
 
 func (po *PostOffice) AddDevice(deviceName string, client postoffice.IClient) {
-	po.redis.Do("HMSET", "POSTOFFICE", deviceName, po.Get("host"))
+	po.redis.Do("HMSET", "POSTOFFICE", deviceName, po.Get("angler"))
 	po.clients.Store(deviceName, client)
 }
 
