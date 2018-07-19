@@ -31,7 +31,7 @@ func (f * Factory)Create(kernel dragonfly.IKernel,config map[interface {}]interf
 		result = &MongoAuth{}
 	case "mock":
 		result = &Mock{}
-	case "":
+	case "redis":
 		result = &RedisAuth{}
 	default:
 		return nil, errors.New(fmt.Sprintf("unknown auth type %s", config["type"]))

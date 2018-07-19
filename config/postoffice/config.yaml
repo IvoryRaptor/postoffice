@@ -1,4 +1,7 @@
 auth:
+#  type: mongodb
+#  host: mongodb.default
+#  port: 27017
   type: redis
   host: redis.default
   port: 6379

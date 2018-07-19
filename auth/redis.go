@@ -43,9 +43,14 @@ func (m *RedisAuth) Authenticate(msg *message.ConnectMessage) *postoffice.Channe
 			"productKey": productKey,
 			"deviceName": deviceName,
 		}
-		secret, err := m.Do("HGET", productKey, deviceName)
-		if secret == nil || err != nil {
-			fmt.Printf("Not found Matrix: %s DeviceName: %s", productKey, deviceName)
+		secret, err := m.Do("hget", "a1A325fYEJX", "admin")
+		if err != nil {
+			fmt.Printf("Redis %s\n", err.Error())
+			return nil
+		}
+		if secret == nil {
+			fmt.Printf("Not found Matrix: %s DeviceName: %s\n", productKey, deviceName)
+			return nil
 		}
 		keys := []string{"productKey", "deviceName", "clientId"}
 		var h hash.Hash = nil
@@ -56,9 +61,9 @@ func (m *RedisAuth) Authenticate(msg *message.ConnectMessage) *postoffice.Channe
 			case "signmethod":
 				switch v[1] {
 				case "hmacsha1":
-					h = hmac.New(sha1.New, []byte(secret.(string)))
+					h = hmac.New(sha1.New, []byte(secret.([]uint8)))
 				case "hmacmd5":
-					h = hmac.New(md5.New, []byte(secret.(string)))
+					h = hmac.New(md5.New, []byte(secret.([]uint8)))
 				default:
 					log.Printf("Unknown signmethod %s", v[1])
 					return nil
