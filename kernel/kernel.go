@@ -31,11 +31,11 @@ func (po *PostOffice) SetFields() {
 }
 
 func (po *PostOffice) GetTopics(matrix string, action string) []string {
-	m := po.zookeeper.GetChilde(matrix)
+	m := po.zookeeper.GetChild(matrix)
 	if m == nil {
 		return nil
 	}
-	m = m.GetChilde(action)
+	m = m.GetChild(action)
 	if m == nil {
 		return nil
 	}

@@ -1,7 +1,7 @@
 auth:
-  type: mongodb
-  host: mongodb.default
-  port: 30707
+  type: redis
+  host: redis.default
+  port: 6379
 zookeeper:
   type: zookeeper
   host: zookeeper.default
