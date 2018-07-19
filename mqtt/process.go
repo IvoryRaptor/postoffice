@@ -142,6 +142,8 @@ func (c *Client) processIncoming(msg message.Message) error {
 		//c.processAcked(c.sess.Pub2out)
 
 	case *message.SubscribeMessage:
+		fmt.Printf("**************%s\n",string(msg.Topics()[0]))
+
 		// For SUBSCRIBE message, we should add subscriber, then send back SUBACK
 		return c.processSubscribe(msg)
 
