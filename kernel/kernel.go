@@ -20,6 +20,7 @@ type PostOffice struct {
 	zookeeper *dragonfly.Zookeeper
 	mq        mq.IMQ
 	redis     *dragonfly.Redis
+	topic     string
 }
 
 func (po *PostOffice) SetFields() {
@@ -28,6 +29,7 @@ func (po *PostOffice) SetFields() {
 	po.mq = po.GetService("mq").(mq.IMQ)
 	po.redis = po.GetService("redis").(*dragonfly.Redis)
 	po.zookeeper = po.GetService("zookeeper").(*dragonfly.Zookeeper)
+	po.topic = fmt.Sprintf("%s_%s", po.Get("matrix"), po.Get("angler"))
 }
 
 func (po *PostOffice) GetTopics(matrix string, action string) []string {
@@ -48,14 +50,9 @@ func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 
 func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string, action string, payload []byte) error {
 	mes := postoffice.MQMessage{
-		Source: &postoffice.Address{
-			Matrix: po.Get("matrix").(string),
-			Device: po.Get("angler").(string),
-		},
-		Destination: &postoffice.Address{
-			Matrix: channel.Matrix,
-			Device: channel.DeviceName,
-		},
+		Caller:   []byte("POSTOFFICE"),
+		Matrix:   channel.Matrix,
+		Device:   channel.DeviceName,
 		Resource: resource,
 		Action:   action,
 		Payload:  payload,
@@ -73,7 +70,7 @@ func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string
 }
 
 func (po *PostOffice) AddDevice(deviceName string, client postoffice.IClient) {
-	po.redis.Do("HMSET", "POSTOFFICE", deviceName, po.Get("angler"))
+	po.redis.Do("HMSET", "POSTOFFICE", deviceName, po.topic)
 	po.clients.Store(deviceName, client)
 }
 
@@ -89,8 +86,8 @@ func (po *PostOffice) Arrive(data []byte) {
 		log.Println(err.Error())
 		return
 	}
-	log.Printf("%s.%s=>%s/%s", msg.Resource, msg.Action, msg.Source.Matrix,msg.Source.Device)
-	val, ok := po.clients.Load(msg.Source.Matrix + "/" + msg.Source.Device)
+	log.Printf("%s=>%s/%s|%s.%s", msg.Caller, msg.Matrix, msg.Device, msg.Action, msg.Resource)
+	val, ok := po.clients.Load(msg.Matrix + "/" + msg.Device)
 	if ok {
 		client := val.(*mqtt.Client)
 		channel := client.GetChannel()
@@ -115,6 +112,6 @@ func (po *PostOffice) Arrive(data []byte) {
 			client.Publish(pus)
 		}
 	} else {
-		log.Printf("MISS Matrix:%s Resource:%s Action:%s\n", msg.Source.Matrix, msg.Resource, msg.Action)
+		log.Printf("MISS Matrix:%s Resource:%s Action:%s\n", msg.Matrix, msg.Resource, msg.Action)
 	}
 }

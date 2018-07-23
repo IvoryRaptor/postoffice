@@ -19,6 +19,8 @@ mq:
   host: kafka.default
   port: 9092
   partition: any
+group:
+  watch: /group
 source:
   ssl:
     crt: ./cert/postoffice.crt

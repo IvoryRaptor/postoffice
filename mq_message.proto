@@ -1,16 +1,13 @@
 syntax = "proto3";
 package postoffice;
 
-message Address {
-    string matrix = 1;
-    string device = 2;
-}
 
 message MQMessage {
-    Address source = 1; //服务提供者
-    Address destination = 2; //服务使用者
-    string resource = 3; //资源
-    string action = 4; //动作
-    bytes payload = 5; //数据
-    int64 time=6;
+    bytes caller = 1;
+    string matrix = 2;
+    string device = 3;
+    string resource = 4; //资源
+    string action = 5; //动作
+    bytes payload = 6; //数据
+    int64 time = 7;
 }
