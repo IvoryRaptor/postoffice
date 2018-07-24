@@ -20,6 +20,7 @@ mq:
   port: 9092
   partition: any
 group:
+  topic: group
   watch: /group
 source:
   ssl:
