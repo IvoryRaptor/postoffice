@@ -17,9 +17,9 @@ type IChannel interface {
 
 type MQTTChannel struct {
 	mqtt.MQTT
-	ln   net.Listener
-	port string
-	ssl  bool
+	ln      net.Listener
+	port    string
+	ssl     bool
 	service *Service
 }
 
@@ -54,7 +54,7 @@ func (s *MQTTChannel) Start() error {
 	go func() {
 		for {
 			conn, err := s.ln.Accept()
-			if err==nil{
+			if err == nil {
 				log.Printf("Accept %s => %s ", conn.RemoteAddr(), s.port)
 				go s.AddChannel(conn)
 				if err != nil {
@@ -67,6 +67,6 @@ func (s *MQTTChannel) Start() error {
 	return nil
 }
 
-func (s *MQTTChannel) Stop(){
+func (s *MQTTChannel) Stop() {
 	s.ln.Close()
 }

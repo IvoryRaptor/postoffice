@@ -9,11 +9,11 @@ import (
 type Factory struct {
 }
 
-func (f * Factory)GetName() string{
+func (f *Factory) GetName() string {
 	return "source"
 }
 
-func (f * Factory)Create(kernel dragonfly.IKernel,config map[interface {}]interface{}) (dragonfly.IService,error) {
+func (f *Factory) Create(kernel dragonfly.IKernel, config map[interface{}]interface{}) (dragonfly.IService, error) {
 	service := Service{}
 	service.Config(kernel, config)
 

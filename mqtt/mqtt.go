@@ -28,7 +28,7 @@ type MQTT struct {
 	KeepAlive      int
 }
 
-func (m * MQTT)AddChannel(conn net.Conn) (err error) {
+func (m *MQTT) AddChannel(conn net.Conn) (err error) {
 	defer func() {
 		if err != nil {
 			conn.Close()
@@ -79,7 +79,7 @@ func (m * MQTT)AddChannel(conn net.Conn) (err error) {
 	svc.inStat.increment(int64(req.Len()))
 	svc.outStat.increment(int64(resp.Len()))
 
-	m.Kernel.AddDevice(channel.Matrix + "/" + channel.DeviceName, svc)
+	m.Kernel.AddDevice(channel.Matrix+"/"+channel.DeviceName, svc)
 	if err := svc.start(); err != nil {
 		svc.Stop()
 		return err

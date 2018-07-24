@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ErrAuthFailure          = errors.New("auth: Authentication failure")
+	ErrAuthFailure = errors.New("auth: Authentication failure")
 )
 
 type IAuthenticator interface {
@@ -20,11 +20,11 @@ type IAuthenticator interface {
 type Factory struct {
 }
 
-func (f * Factory)GetName() string{
+func (f *Factory) GetName() string {
 	return "auth"
 }
 
-func (f * Factory)Create(kernel dragonfly.IKernel,config map[interface {}]interface{}) (dragonfly.IService,error) {
+func (f *Factory) Create(kernel dragonfly.IKernel, config map[interface{}]interface{}) (dragonfly.IService, error) {
 	var result IAuthenticator
 	switch config["type"] {
 	case "mongodb":

@@ -359,7 +359,7 @@ func (buff *buffer) ReadPeek(n int) ([]byte, error) {
 			buff.tmp = append(buff.tmp, buff.buf[0:m-int64(l)]...)
 			return buff.tmp, err
 		} else {
-			return buff.buf[cindex : cindex+m], err
+			return buff.buf[cindex: cindex+m], err
 		}
 	}
 
@@ -411,7 +411,7 @@ func (buff *buffer) ReadWait(n int) ([]byte, error) {
 		return buff.tmp[:n], nil
 	}
 
-	return buff.buf[cindex : cindex+int64(n)], nil
+	return buff.buf[cindex: cindex+int64(n)], nil
 }
 
 // Commit moves the cursor forward by n bytes. It behaves like Read() except it doesn't
@@ -465,7 +465,7 @@ func (buff *buffer) WriteWait(n int) ([]byte, bool, error) {
 		return buff.buf[pstart:], true, nil
 	}
 
-	return buff.buf[pstart : pstart+int64(cnt)], false, nil
+	return buff.buf[pstart: pstart+int64(cnt)], false, nil
 }
 
 func (buff *buffer) WriteCommit(n int) (int, error) {

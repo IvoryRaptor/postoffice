@@ -102,9 +102,8 @@ func (c *Client) processIncoming(msg message.Message) error {
 
 	switch msg := msg.(type) {
 	case *message.PublishMessage:
-		sp:=strings.Split(string(msg.Topic()),"/")
-		c.kernel.Publish(c.channel,sp[3],sp[4],msg.Payload())
-
+		sp := strings.Split(string(msg.Topic()), "/")
+		c.kernel.Publish(c.channel, sp[3], sp[4], msg.Payload())
 
 	case *message.PubackMessage:
 		// For PUBACK message, it means QoS 1, we should send to ack queue
@@ -142,7 +141,7 @@ func (c *Client) processIncoming(msg message.Message) error {
 		//c.processAcked(c.sess.Pub2out)
 
 	case *message.SubscribeMessage:
-		fmt.Printf("**************%s\n",string(msg.Topics()[0]))
+		fmt.Printf("**************%s\n", string(msg.Topics()[0]))
 
 		// For SUBSCRIBE message, we should add subscriber, then send back SUBACK
 		return c.processSubscribe(msg)
@@ -185,6 +184,7 @@ func (c *Client) processIncoming(msg message.Message) error {
 
 	return err
 }
+
 // For SUBSCRIBE message, we should add subscriber, then send back SUBACK
 func (c *Client) processSubscribe(msg *message.SubscribeMessage) error {
 	resp := message.NewSubackMessage()

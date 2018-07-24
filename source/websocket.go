@@ -14,9 +14,9 @@ import (
 
 type WebSocketChannel struct {
 	mqtt.MQTT
-	kernel postoffice.IPostOffice
-	server * http.Server
-	ssl bool
+	kernel  postoffice.IPostOffice
+	server  *http.Server
+	ssl     bool
 	service *Service
 }
 
@@ -25,8 +25,7 @@ type WebSocketConn struct {
 	conn       *websocket.Conn
 }
 
-
-func (w *WebSocketConn)Write(b []byte) (n int, err error) {
+func (w *WebSocketConn) Write(b []byte) (n int, err error) {
 	err = w.conn.WriteMessage(2, b)
 	return len(b), err
 }
@@ -50,27 +49,27 @@ func (w *WebSocketConn) Read(b []byte) (n int, err error) {
 	return n, nil
 }
 
-func (w *WebSocketConn) Close() error{
+func (w *WebSocketConn) Close() error {
 	return w.conn.Close()
 }
 
-func (w *WebSocketConn) LocalAddr() net.Addr{
+func (w *WebSocketConn) LocalAddr() net.Addr {
 	return w.conn.LocalAddr()
 }
 
-func (w *WebSocketConn) RemoteAddr() net.Addr{
+func (w *WebSocketConn) RemoteAddr() net.Addr {
 	return w.conn.RemoteAddr()
 }
 
-func (w *WebSocketConn) SetDeadline(t time.Time) error{
+func (w *WebSocketConn) SetDeadline(t time.Time) error {
 	return w.conn.SetReadDeadline(t)
 }
 
-func (w *WebSocketConn) SetReadDeadline(t time.Time) error{
+func (w *WebSocketConn) SetReadDeadline(t time.Time) error {
 	return w.conn.SetReadDeadline(t)
 }
 
-func (w *WebSocketConn) SetWriteDeadline(t time.Time) error{
+func (w *WebSocketConn) SetWriteDeadline(t time.Time) error {
 	return w.conn.SetWriteDeadline(t)
 }
 
@@ -121,6 +120,6 @@ func (s *WebSocketChannel) Start() error {
 	return nil
 }
 
-func (s *WebSocketChannel) Stop(){
+func (s *WebSocketChannel) Stop() {
 	s.server.Shutdown(nil)
 }

@@ -99,7 +99,7 @@ func (m *MongoAuth) Authenticate(msg *message.ConnectMessage) *postoffice.Channe
 		}
 	} else {
 		data := bson.M{}
-		err := c.Find(bson.M{"token": clientId,"time":bson.M{"$gte":time.Now()}}).One(data)
+		err := c.Find(bson.M{"token": clientId, "time": bson.M{"$gte": time.Now()}}).One(data)
 		if err != nil {
 			return nil
 		}

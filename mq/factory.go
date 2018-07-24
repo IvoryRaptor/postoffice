@@ -8,11 +8,11 @@ import (
 type Factory struct {
 }
 
-func (f * Factory)GetName() string{
+func (f *Factory) GetName() string {
 	return "mq"
 }
 
-func (f * Factory)Create(kernel dragonfly.IKernel,config map[interface {}]interface{}) (dragonfly.IService,error) {
+func (f *Factory) Create(kernel dragonfly.IKernel, config map[interface{}]interface{}) (dragonfly.IService, error) {
 	var m mq.IMQ = nil
 	switch config["type"] {
 	case "kafka":
@@ -21,5 +21,3 @@ func (f * Factory)Create(kernel dragonfly.IKernel,config map[interface {}]interf
 	}
 	return m, nil
 }
-
-

@@ -92,11 +92,11 @@ func (this *SubackMessage) Decode(src []byte) (int, error) {
 	}
 
 	//this.packetId = binary.BigEndian.Uint16(src[total:])
-	this.packetId = src[total : total+2]
+	this.packetId = src[total: total+2]
 	total += 2
 
 	l := int(this.remlen) - (total - hn)
-	this.returnCodes = src[total : total+l]
+	this.returnCodes = src[total: total+l]
 	total += len(this.returnCodes)
 
 	for i, code := range this.returnCodes {

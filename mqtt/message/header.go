@@ -194,7 +194,7 @@ func (this *header) decode(src []byte) (int, error) {
 	mtype := this.Type()
 	//mtype := MessageType(0)
 
-	this.mtypeflags = src[total : total+1]
+	this.mtypeflags = src[total: total+1]
 	//mtype := MessageType(src[total] >> 4)
 	if !this.Type().Valid() {
 		return total, fmt.Errorf("header/Decode: Invalid message type %d.", mtype)
@@ -209,7 +209,7 @@ func (this *header) decode(src []byte) (int, error) {
 		return total, fmt.Errorf("header/Decode: Invalid message (%d) flags. Expecting %d, got %d", this.Type(), this.Type().DefaultFlags(), this.Flags())
 	}
 
-	if this.Type() == PUBLISH && !ValidQos((this.Flags()>>1)&0x3) {
+	if this.Type() == PUBLISH && !ValidQos((this.Flags() >> 1) & 0x3) {
 		return total, fmt.Errorf("header/Decode: Invalid QoS (%d) for PUBLISH message.", (this.Flags()>>1)&0x3)
 	}
 

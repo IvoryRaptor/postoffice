@@ -5,7 +5,7 @@ import (
 	"github.com/IvoryRaptor/dragonfly/mq"
 )
 
-type ChannelConfig struct{
+type ChannelConfig struct {
 	DeviceName string
 	Matrix     string
 	Token      string

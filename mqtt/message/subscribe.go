@@ -162,7 +162,7 @@ func (this *SubscribeMessage) Decode(src []byte) (int, error) {
 	}
 
 	//this.packetId = binary.BigEndian.Uint16(src[total:])
-	this.packetId = src[total : total+2]
+	this.packetId = src[total: total+2]
 	total += 2
 
 	remlen := int(this.remlen) - (total - hn)

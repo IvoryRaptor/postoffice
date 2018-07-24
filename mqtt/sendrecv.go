@@ -81,8 +81,8 @@ func (c *Client) receiver() {
 			}
 		}
 
-	//case *websocket.Conn:
-	//	glog.Errorf("(%s) Websocket: %v", c.cid(), ErrInvalidConnectionType)
+		//case *websocket.Conn:
+		//	glog.Errorf("(%s) Websocket: %v", c.cid(), ErrInvalidConnectionType)
 
 	default:
 		glog.Errorf("(%s) %v", c.cid(), ErrInvalidConnectionType)
@@ -119,8 +119,8 @@ func (c *Client) sender() {
 			}
 		}
 
-	//case *websocket.Conn:
-	//	glog.Errorf("(%s) Websocket not supported", c.cid())
+		//case *websocket.Conn:
+		//	glog.Errorf("(%s) Websocket not supported", c.cid())
 
 	default:
 		glog.Errorf("(%s) Invalid connection type", c.cid())

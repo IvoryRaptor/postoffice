@@ -26,7 +26,7 @@ import (
 
 type (
 	OnCompleteFunc func(msg, ack message.Message, err error) error
-	OnPublishFunc  func(msg *message.PublishMessage) error
+	OnPublishFunc func(msg *message.PublishMessage) error
 )
 
 type stat struct {

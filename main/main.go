@@ -18,7 +18,7 @@ func main() {
 	hostname := flag.String("hostname", os.Getenv("hostname"), "is ok")
 	flag.Parse()
 
-	k.Set("matrix","default")
+	k.Set("matrix", "default")
 	k.Set("angler", *hostname)
 
 	err := dragonfly.Builder(
