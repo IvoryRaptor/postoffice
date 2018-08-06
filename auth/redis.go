@@ -3,103 +3,72 @@ package auth
 import (
 	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/postoffice"
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"crypto/hmac"
-	"crypto/md5"
 	"sort"
 	"fmt"
-	"gopkg.in/mgo.v2/bson"
-	"crypto/sha1"
 	"strings"
-	"hash"
 	"log"
+	"crypto/hmac"
+	"crypto/sha1"
+	"crypto/md5"
+	"hash"
 )
 
 type RedisAuth struct {
 	dragonfly.Redis
 }
 
-func (m *RedisAuth) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
-	clientId := string(msg.ClientId())
-	deviceName := ""
-	productKey := ""
-
-	if strings.Index(clientId, "|") > 0 {
-		sp := strings.Split(string(msg.Username()), "&")
-		if len(sp) != 2 {
-			return nil
-		}
-		deviceName = sp[0]
-		productKey = sp[1]
-
-		sp = strings.Split(string(msg.ClientId()), "|")
-		if len(sp) != 3 {
-			return nil
-		}
-		clientId = sp[0]
-		sp = strings.Split(sp[1], ",")
-		params := map[string]string{
-			"clientId":   clientId,
-			"productKey": productKey,
-			"deviceName": deviceName,
-		}
-		secret, err := m.Do("hget", "a1A325fYEJX", "admin")
+func (m *RedisAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.ChannelConfig {
+	switch block.SecureMode {
+	case 2:
+		v, err := m.Do("HGET", block.ProductKey, block.DeviceName)
 		if err != nil {
 			fmt.Printf("Redis %s\n", err.Error())
 			return nil
 		}
-		if secret == nil {
-			fmt.Printf("Not found Matrix: %s DeviceName: %s\n", productKey, deviceName)
+		if v == nil {
+			fmt.Printf("Not found Matrix: %s DeviceName: %s\n", block.ProductKey, block.DeviceName)
 			return nil
 		}
-		keys := []string{"productKey", "deviceName", "clientId"}
+		var secret = []byte(v.([]uint8))
 		var h hash.Hash = nil
-		for _, i := range sp {
-			v := strings.Split(i, "=")
-			switch v[0] {
-			case "securemode":
-			case "signmethod":
-				switch v[1] {
-				case "hmacsha1":
-					h = hmac.New(sha1.New, []byte(secret.([]uint8)))
-				case "hmacmd5":
-					h = hmac.New(md5.New, []byte(secret.([]uint8)))
-				default:
-					log.Printf("Unknown signmethod %s", v[1])
-					return nil
-				}
-			case "timestamp":
-				keys = append(keys, v[0])
-				params[v[0]] = v[1]
-			}
+		switch block.SignMethod {
+		case "hmacsha1":
+			h = hmac.New(sha1.New, secret)
+		case "hmacmd5":
+			h = hmac.New(md5.New, secret)
+		default:
+			log.Printf("Unknown signmethod %s", block.SignMethod)
+			return nil
 		}
-		sort.Strings(keys)
-		for _, key := range keys {
+		sort.Strings(block.Keys)
+		for _, key := range block.Keys {
 			h.Write([]byte(key))
-			h.Write([]byte(params[key]))
+			h.Write([]byte(block.Params[key]))
 		}
-		if !strings.EqualFold(string(msg.Password()), fmt.Sprintf("%X", h.Sum(nil))) {
-			return nil
-		}
-	} else {
-		data := bson.M{}
-		token, err := m.Do("GET", productKey+"@"+deviceName+"TOKEN")
-		if token == nil || err != nil {
-			fmt.Printf("Not Found Matrix: %s DeviceName: %s", productKey, deviceName)
-			return nil
-		}
-		if token.(string) != clientId {
-			return nil
-		}
-		deviceName = data["deviceName"].(string)
-		productKey = data["iotnn"].(string)
 
+		if !strings.EqualFold(block.Password, fmt.Sprintf("%X", h.Sum(nil))) {
+			return nil
+		}
+	case 99:
+		v, err := m.Do("GET", block.ProductKey+"@"+block.Username)
+		if err != nil {
+			fmt.Printf("Redis %s\n", err.Error())
+			return nil
+		}
+		if v == nil {
+			fmt.Printf("Not found Matrix: %s DeviceName: %s\n", block.ProductKey, block.DeviceName)
+			return nil
+		}
+		block.DeviceName = string([]byte(v.([]uint8)))
+	default:
+		log.Printf("Redis Auth Unknown securemode %d", block.SecureMode)
+		return nil
 	}
 	token := randSeq(8)
-	m.Do("SETEX", productKey+"@"+deviceName+"TOKEN", 60, token)
+	m.Do("SETEX", block.ProductKey+"@"+token, 60, block.DeviceName)
 	config := postoffice.ChannelConfig{
-		DeviceName: deviceName,
-		Matrix:     productKey,
+		DeviceName: block.DeviceName,
+		Matrix:     block.ProductKey,
 		Token:      token,
 	}
 	return &config

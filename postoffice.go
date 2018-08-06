@@ -3,12 +3,30 @@ package postoffice
 import (
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"github.com/IvoryRaptor/dragonfly/mq"
+	"github.com/IvoryRaptor/dragonfly"
 )
 
 type ChannelConfig struct {
 	DeviceName string
 	Matrix     string
 	Token      string
+}
+
+type AuthBlock struct {
+	ClientId   string
+	DeviceName string
+	ProductKey string
+	SecureMode int
+	SignMethod string
+	Keys       []string
+	Params     map[string]string
+	Username   string
+	Password   string
+}
+
+type IAuthenticator interface {
+	dragonfly.IService
+	Authenticate(block *AuthBlock) *ChannelConfig
 }
 
 type IClient interface {

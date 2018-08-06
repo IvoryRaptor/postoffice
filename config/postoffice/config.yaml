@@ -9,7 +9,7 @@ zookeeper:
   type: zookeeper
   host: zookeeper.default
   port: 2181
-  path: /iotnn
+  path: /iotnn/postoffice
   level: 3
 redis:
   host: redis.default

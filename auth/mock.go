@@ -2,7 +2,6 @@ package auth
 
 import (
 	"github.com/IvoryRaptor/postoffice"
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"github.com/IvoryRaptor/dragonfly"
 )
 
@@ -19,11 +18,11 @@ func (m *Mock) Start() error {
 	return nil
 }
 
-func (m *Mock) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
+func (m *Mock) Authenticate(block *postoffice.AuthBlock) *postoffice.ChannelConfig {
 	config := postoffice.ChannelConfig{
 		//ClientId:   string(msg.ClientId()),
-		DeviceName: string(msg.Username()),
-		Matrix:     string(msg.Password()),
+		DeviceName: block.Username,
+		Matrix:     block.Password,
 	}
 	return &config
 }
