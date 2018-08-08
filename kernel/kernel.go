@@ -93,7 +93,7 @@ func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 
 func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string, action string, payload []byte) error {
 	mes := postoffice.MQMessage{
-		Caller:   []byte("POSTOFFICE"),
+		Caller:   []byte(po.topic),
 		Matrix:   channel.Matrix,
 		Device:   channel.DeviceName,
 		Resource: resource,

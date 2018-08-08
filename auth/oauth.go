@@ -54,18 +54,18 @@ func (m *OAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.ChannelCon
 			return nil
 		}
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		_, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Printf("Http %s :%s", url, err.Error())
 			return nil
 		}
-
-		if len(res) == 0 {
-			log.Printf("Http %s :%s", url, body)
-			return nil
-		}
+		//
+		//if len(res) == 0 {
+		//	log.Printf("Http %s :%s", url, body)
+		//	return nil
+		//}
 		config := postoffice.ChannelConfig{
-			DeviceName: res[0],
+			DeviceName: "",
 			Matrix:     block.ProductKey,
 		}
 		return &config
