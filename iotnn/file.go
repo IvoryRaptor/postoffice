@@ -5,17 +5,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type IOTNN interface {
-	dragonfly.IService
-	GetMatrix(matrix string) map[string][]string
-}
-
 type FileWatch struct {
 	dragonfly.FileWatchService
 	route map[string]map[string][]string
 }
 
-func (l *FileWatch) FileChange(data []byte) error {
+func (l *FileWatch) fileChange(data []byte) error {
+	l.route = map[string]map[string][]string{}
 	return yaml.Unmarshal(data, &l.route)
 }
 

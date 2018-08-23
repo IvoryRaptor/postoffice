@@ -30,7 +30,9 @@ func (f *Factory) Create(kernel dragonfly.IKernel, config map[interface{}]interf
 	case "oauth":
 		result = &OAuth{}
 	case "group":
-		result = &GroupAuth{}
+		g := GroupAuth{}
+		g.FileChange = g.fileChange
+		result = &g
 	default:
 		return nil, errors.New(fmt.Sprintf("unknown auth type %s", config["type"]))
 	}

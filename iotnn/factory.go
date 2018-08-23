@@ -4,6 +4,11 @@ import (
 	"github.com/IvoryRaptor/dragonfly"
 )
 
+type IOTNN interface {
+	dragonfly.IService
+	GetMatrix(matrix string) map[string][]string
+}
+
 type Factory struct {
 }
 
@@ -15,8 +20,10 @@ func (f *Factory) Create(kernel dragonfly.IKernel, config map[interface{}]interf
 	var r dragonfly.IService = nil
 	switch config["type"] {
 	case "file":
-		r = &FileWatch{}
-		r.Config(kernel, config)
+		f := FileWatch{}
+		f.FileChange = f.fileChange
+		f.Config(kernel, config)
+		r = &f
 	}
 	return r, nil
 }

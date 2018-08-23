@@ -47,7 +47,6 @@ func (m *MQTT) AddChannel(conn net.Conn) (err error) {
 		return err
 	}
 	// Authenticate the user, if error, return error and exit
-	println(req.String())
 	channel := m.Kernel.Authenticate(req)
 	if channel == nil {
 		resp.SetReturnCode(message.ErrBadUsernameOrPassword)

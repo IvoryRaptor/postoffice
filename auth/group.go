@@ -4,6 +4,7 @@ import (
 	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/postoffice"
 	"gopkg.in/yaml.v2"
+	"log"
 )
 
 type GroupAuth struct {
@@ -12,9 +13,9 @@ type GroupAuth struct {
 	groups map[string]dragonfly.IService
 }
 
-func (g *GroupAuth) FileChange(data []byte) error {
+func (g *GroupAuth) fileChange(data []byte) error {
 	var configs []map[interface{}]interface{}
-	if err := yaml.Unmarshal(data, configs); err != nil {
+	if err := yaml.Unmarshal(data, &configs); err != nil {
 		return err
 	}
 	n := map[string]dragonfly.IService{}
@@ -37,6 +38,7 @@ func (g *GroupAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.Channe
 	if v, ok := g.groups[block.ProductKey]; ok {
 		a = v.(postoffice.IAuthenticator)
 	} else {
+		log.Printf("Unknown Auth %s", block.ProductKey)
 		return nil
 	}
 	return a.Authenticate(block)

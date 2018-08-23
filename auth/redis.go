@@ -51,6 +51,7 @@ func (m *RedisAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.Channe
 		}
 
 		if !strings.EqualFold(block.Password, fmt.Sprintf("%X", h.Sum(nil))) {
+			log.Printf("%s %s", block.Password, fmt.Sprintf("%X", h.Sum(nil)))
 			return nil
 		}
 	case 99:
