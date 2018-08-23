@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"github.com/IvoryRaptor/dragonfly"
-	"github.com/IvoryRaptor/postoffice"
 	"errors"
 	"fmt"
+	"github.com/IvoryRaptor/dragonfly"
+	"github.com/IvoryRaptor/postoffice"
 )
 
 var (
@@ -27,11 +27,15 @@ func (f *Factory) Create(kernel dragonfly.IKernel, config map[interface{}]interf
 		result = &Mock{}
 	case "redis":
 		result = &RedisAuth{}
-	case "zkgroup":
-		result = &ZkGroupAuth{}
+	case "oauth":
+		result = &OAuth{}
+	case "group":
+		result = &GroupAuth{}
 	default:
 		return nil, errors.New(fmt.Sprintf("unknown auth type %s", config["type"]))
 	}
 	result.Config(kernel, config)
 	return result, nil
 }
+
+var Singleton = Factory{}

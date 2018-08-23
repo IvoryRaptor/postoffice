@@ -1,15 +1,16 @@
 package source
 
 import (
-	"net/http"
-	"github.com/gorilla/websocket"
-	"log"
-	"github.com/IvoryRaptor/postoffice"
-	"fmt"
-	"time"
-	"net"
 	"bytes"
+	"fmt"
+	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mqtt"
+	"github.com/gorilla/websocket"
+	"github.com/surge/glog"
+	"log"
+	"net"
+	"net/http"
+	"time"
 )
 
 type WebSocketChannel struct {
@@ -96,6 +97,7 @@ func (s *WebSocketChannel) Config(service *Service, config map[interface{}]inter
 			log.Print("upgrade:", err)
 			return
 		}
+		glog.Info("new client.........")
 		c.SetReadDeadline(time.Now().Add(time.Second * time.Duration(s.ConnectTimeout)))
 		s.AddChannel(&WebSocketConn{conn: c})
 	})

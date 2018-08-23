@@ -1,27 +1,31 @@
 auth:
-#  type: mongodb
-#  host: mongodb.default
-#  port: 27017
-  type: redis
-  host: redis.default
-  port: 6379
-zookeeper:
-  type: zookeeper
-  host: zookeeper.default
-  port: 2181
-  path: /iotnn/postoffice
-  level: 3
+  #  type: mongodb
+  #  host: mongodb.default
+  #  port: 27017
+  #  type: zkgroup
+  #  host: zookeeper.default
+  #  port: 2181
+  type: group
+  file: ./config/auth_group/config.yaml
+#  http: http://localhost:9004/api/oauth/tokens?grant_type=authorization_code&code=%s&redirect_uri=https:%2F%2Fwww.example.com
+#  method: get
+#  headers:
+#    Authorization: Basic dGVzdF9jbGllbnRfMTp0ZXN0X3NlY3JldA==
+#  userid: openid
+#  type: redis
+#  host: redis.default
+#  port: 6379
+iotnn:
+  type: file
+  file: ./config/iotnn/config.yaml
 redis:
   host: redis.default
-  port: 6379
+  port: 30379
 mq:
   type: kafka
   host: kafka.default
-  port: 9092
+  port: 30092
   partition: any
-group:
-  topic: group
-  watch: /group
 source:
   ssl:
     crt: ./cert/postoffice.crt

@@ -1,9 +1,9 @@
 package source
 
 import (
-	"github.com/IvoryRaptor/dragonfly"
-	"fmt"
 	"errors"
+	"fmt"
+	"github.com/IvoryRaptor/dragonfly"
 )
 
 type Factory struct {
@@ -36,3 +36,5 @@ func (f *Factory) Create(kernel dragonfly.IKernel, config map[interface{}]interf
 	}
 	return &service, nil
 }
+
+var Singleton = Factory{}

@@ -1,12 +1,12 @@
 package mqtt
 
 import (
-	"net"
 	"errors"
+	"fmt"
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
 	"log"
-	"fmt"
+	"net"
 )
 
 var (
@@ -47,12 +47,15 @@ func (m *MQTT) AddChannel(conn net.Conn) (err error) {
 		return err
 	}
 	// Authenticate the user, if error, return error and exit
+	println(req.String())
 	channel := m.Kernel.Authenticate(req)
 	if channel == nil {
 		resp.SetReturnCode(message.ErrBadUsernameOrPassword)
 		resp.SetSessionPresent(false)
 		writeMessage(conn, resp)
-		return err
+		err = errors.New("Authenticate error")
+		return errors.New("Authenticate error")
+		//return err
 	}
 
 	m.Kernel.Publish(channel, "device", "online", []byte(channel.Token))

@@ -1,21 +1,25 @@
 package auth
 
 import (
+	"crypto/hmac"
+	"crypto/md5"
+	"crypto/sha1"
+	"fmt"
 	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/postoffice"
-	"sort"
-	"fmt"
-	"strings"
-	"log"
-	"crypto/hmac"
-	"crypto/sha1"
-	"crypto/md5"
 	"hash"
+	"log"
+	"sort"
+	"strings"
 )
 
 type RedisAuth struct {
 	dragonfly.Redis
 }
+
+//func (r *RedisAuth) Stop() {
+//	r.Conn.Close()
+//}
 
 func (m *RedisAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.ChannelConfig {
 	switch block.SecureMode {

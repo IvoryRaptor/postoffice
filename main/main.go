@@ -2,13 +2,14 @@ package main
 
 import (
 	"flag"
-	"os"
-	"log"
 	"github.com/IvoryRaptor/dragonfly"
-	"github.com/IvoryRaptor/postoffice/kernel"
-	"github.com/IvoryRaptor/postoffice/source"
 	"github.com/IvoryRaptor/postoffice/auth"
+	"github.com/IvoryRaptor/postoffice/iotnn"
+	"github.com/IvoryRaptor/postoffice/kernel"
 	"github.com/IvoryRaptor/postoffice/mq"
+	"github.com/IvoryRaptor/postoffice/source"
+	"log"
+	"os"
 )
 
 func main() {
@@ -24,11 +25,11 @@ func main() {
 	err := dragonfly.Builder(
 		&k,
 		[]dragonfly.IServiceFactory{
-			&source.Factory{},
-			&auth.Factory{},
-			&mq.Factory{},
-			&dragonfly.RedisFactory{},
-			&dragonfly.ZookeeperFactory{},
+			&source.Singleton,
+			&auth.Singleton,
+			&mq.Singleton,
+			&iotnn.Singleton,
+			&dragonfly.Singleton,
 		})
 	k.SetFields()
 	if err != nil {

@@ -1,0 +1,14 @@
+zookeeper:
+  host: zookeeper.default
+  port: 2181
+mq:
+  host: kafka.default
+  port: 9092
+source:
+  protocol:
+    type: json
+  type: websocket
+  port: 9000
+  timeout: 1000
+  tlskey: /etc/secret.d/tls.key
+  tlscrt: /etc/secret.d/tls.crt

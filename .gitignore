@@ -13,3 +13,7 @@
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
 go_build_main_go
+/config/auth_group/
+/config/iotnn/
+/config/cert/
+

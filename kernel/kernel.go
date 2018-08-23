@@ -2,26 +2,28 @@ package kernel
 
 import (
 	"fmt"
-	"sync"
 	"github.com/IvoryRaptor/dragonfly"
-	"github.com/IvoryRaptor/postoffice"
-	"github.com/golang/protobuf/proto"
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"github.com/IvoryRaptor/postoffice/mqtt"
-	"log"
 	"github.com/IvoryRaptor/dragonfly/mq"
+	"github.com/IvoryRaptor/postoffice"
+	"github.com/IvoryRaptor/postoffice/iotnn"
+	"github.com/IvoryRaptor/postoffice/mqtt"
+	"github.com/IvoryRaptor/postoffice/mqtt/message"
+	"github.com/golang/protobuf/proto"
+	"github.com/surge/glog"
+	"log"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type PostOffice struct {
 	dragonfly.Kernel
-	auth      postoffice.IAuthenticator
-	clients   sync.Map
-	zookeeper *dragonfly.Zookeeper
-	mq        mq.IMQ
-	redis     *dragonfly.Redis
-	topic     string
+	auth    postoffice.IAuthenticator
+	clients sync.Map
+	iotnn   iotnn.IOTNN
+	mq      mq.IMQ
+	redis   *dragonfly.Redis
+	topic   string
 }
 
 func (po *PostOffice) SetFields() {
@@ -29,20 +31,19 @@ func (po *PostOffice) SetFields() {
 	po.clients = sync.Map{}
 	po.mq = po.GetService("mq").(mq.IMQ)
 	po.redis = po.GetService("redis").(*dragonfly.Redis)
-	po.zookeeper = po.GetService("zookeeper").(*dragonfly.Zookeeper)
+	po.iotnn = po.GetService("iotnn").(iotnn.IOTNN)
 	po.topic = fmt.Sprintf("%s_%s", po.Get("matrix"), po.Get("angler"))
 }
 
 func (po *PostOffice) GetTopics(matrix string, action string) []string {
-	m := po.zookeeper.GetChild(matrix)
+	m := po.iotnn.GetMatrix(matrix)
 	if m == nil {
 		return nil
 	}
-	m = m.GetChild(action)
-	if m == nil {
-		return nil
+	if _, ok := m[action]; ok {
+		return m[action]
 	}
-	return m.GetKeys()
+	return nil
 }
 
 func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.ChannelConfig {
@@ -93,7 +94,7 @@ func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 
 func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string, action string, payload []byte) error {
 	mes := postoffice.MQMessage{
-		Caller:   []byte("POSTOFFICE"),
+		Caller:   []byte(po.topic),
 		Matrix:   channel.Matrix,
 		Device:   channel.DeviceName,
 		Resource: resource,
@@ -104,6 +105,7 @@ func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string
 	if topics != nil {
 		payload, _ := proto.Marshal(&mes)
 		for _, topic := range topics {
+			log.Printf("topics [%s]", topic)
 			po.mq.Publish(topic, []byte(channel.DeviceName), payload)
 		}
 	} else {
@@ -113,7 +115,15 @@ func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string
 }
 
 func (po *PostOffice) AddDevice(deviceName string, client postoffice.IClient) {
+	glog.Info("AddDevice")
 	po.redis.Do("HMSET", "POSTOFFICE", deviceName, po.topic)
+	//if client, ok := po.clients.Load(deviceName); ok {
+	//	fmt.Println("ok find client")
+	//	if newA, y := client.(mqtt.Client); y {
+	//		fmt.Println("client y")
+	//		newA.Stop()
+	//	}
+	//}
 	po.clients.Store(deviceName, client)
 }
 

@@ -1,25 +1,24 @@
-package mq
+package iotnn
 
 import (
 	"github.com/IvoryRaptor/dragonfly"
-	"github.com/IvoryRaptor/dragonfly/mq"
 )
 
 type Factory struct {
 }
 
 func (f *Factory) GetName() string {
-	return "mq"
+	return "iotnn"
 }
 
 func (f *Factory) Create(kernel dragonfly.IKernel, config map[interface{}]interface{}) (dragonfly.IService, error) {
-	var m mq.IMQ = nil
+	var r dragonfly.IService = nil
 	switch config["type"] {
-	case "kafka":
-		m = &Kafka{}
-		m.Config(kernel, config)
+	case "file":
+		r = &FileWatch{}
+		r.Config(kernel, config)
 	}
-	return m, nil
+	return r, nil
 }
 
 var Singleton = Factory{}
