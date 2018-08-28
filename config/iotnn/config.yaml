@@ -1,257 +1,109 @@
-shop-manager:
+manager:
   device.offline:
-    - shop-manager_dashboard
+    - manager_dashboard
   device.online:
-    - shop-manager_dashboard
+    - manager_dashboard
   resource.all:
-    - shop-manager_dashboard
+    - manager_dashboard
   resource.get:
-    - shop-manager_dashboard
+    - manager_dashboard
   resource.list:
-    - shop-manager_dashboard
+    - manager_dashboard
   resource.save:
-    - shop-manager_dashboard
+    - manager_dashboard
   page.all:
-    - shop-manager_dashboard
+    - manager_dashboard
   page.get:
-    - shop-manager_dashboard
+    - manager_dashboard
   page.list:
-    - shop-manager_dashboard
+    - manager_dashboard
   page.save:
-    - shop-manager_dashboard
+    - manager_dashboard
   role.all:
-    - shop-manager_dashboard
+    - manager_dashboard
   menu.all:
-    - shop-manager_dashboard
+    - manager_dashboard
   menu.get:
-    - shop-manager_dashboard
+    - manager_dashboard
   menu.list:
-    - shop-manager_dashboard
+    - manager_dashboard
   menu.save:
-    - shop-manager_dashboard
+    - manager_dashboard
   admin.delete:
-    - shop-manager_dashboard
+    - manager_dashboard
   admin.list:
-    - shop-manager_dashboard
+    - manager_dashboard
   admin.post:
-    - shop-manager_dashboard
+    - manager_dashboard
   admin.put:
-    - shop-manager_dashboard
+    - manager_dashboard
   admin.save:
-    - shop-manager_dashboard
+    - manager_dashboard
   app.set_user:
-    - shop-manager_dashboard
+    - manager_dashboard
   group.all:
-    - shop-manager_dashboard
+    - manager_dashboard
   group.delete:
-    - shop-manager_dashboard
+    - manager_dashboard
   group.list:
-    - shop-manager_dashboard
+    - manager_dashboard
   group.post:
-    - shop-manager_dashboard
+    - manager_dashboard
   group.put:
-    - shop-manager_dashboard
+    - manager_dashboard
   group.save:
-    - shop-manager_dashboard
+    - manager_dashboard
   parameter.get:
-    - shop-manager_dashboard
+    - manager_dashboard
   parameter.save:
-    - shop-manager_dashboard
+    - manager_dashboard
   image.upload:
-    - shop-manager_dashboard
+    - manager_dashboard
+  matrix.all:
+    - manager_velociraptor
+  matrix.delete:
+    - manager_velociraptor
+  matrix.get:
+    - manager_velociraptor
+  matrix.list:
+    - manager_velociraptor
+  matrix.save:
+    - manager_velociraptor
+  matrix.sync:
+    - manager_velociraptor
+  dance.apply:
+    - manager_velociraptor
+  dance.delete:
+    - manager_velociraptor
+  dance.get:
+    - manager_velociraptor
+  dance.list:
+    - manager_velociraptor
+  dance.save:
+    - manager_velociraptor
+  project.all:
+    - manager_velociraptor
+  project.delete:
+    - manager_velociraptor
+  project.get:
+    - manager_velociraptor
+  project.list:
+    - manager_velociraptor
+  project.save:
+    - manager_velociraptor
   document_type.all:
-    - shop-manager_blog
+    - manager_blog
   document_type.delete:
-    - shop-manager_blog
+    - manager_blog
   document_type.list:
-    - shop-manager_blog
+    - manager_blog
   document_type.save:
-    - shop-manager_blog
+    - manager_blog
   document.delete:
-    - shop-manager_blog
-  document.list:
-    - shop-manager_blog
+    - manager_blog
   document.get:
-    - shop-manager_blog
+    - manager_blog
+  document.list:
+    - manager_blog
   document.save:
-    - shop-manager_blog
-  user.all:
-    -  shop-manager_shop
-  user.list:
-    -  shop-manager_shop
-  user.save:
-    -  shop-manager_shop
-  user_level.all:
-    -  shop-manager_shop
-  user_level.list:
-    -  shop-manager_shop
-  user_level.save:
-    -  shop-manager_shop
-  questionnaire_result.all:
-    -  shop-manager_shop
-  questionnaire_result.list:
-    -  shop-manager_shop
-  questionnaire_result.save:
-    -  shop-manager_shop
-  merchandise_type.all:
-    -  shop-manager_shop
-  merchandise_type.delete:
-    -  shop-manager_shop
-  merchandise_type.list:
-    -  shop-manager_shop
-  merchandise_type.save:
-    -  shop-manager_shop
-  questionnaire.all:
-    -  shop-manager_shop
-  questionnaire.list:
-    -  shop-manager_shop
-  questionnaire.save:
-    -  shop-manager_shop
-  coupon.all:
-    -  shop-manager_shop
-  coupon.list:
-    -  shop-manager_shop
-  coupon.save:
-    -  shop-manager_shop
-  order.all:
-    -  shop-manager_shop
-  order.get:
-    -  shop-manager_shop
-  order.list:
-    -  shop-manager_shop
-  order.save:
-    -  shop-manager_shop
-  activity.all:
-    -  shop-manager_shop
-  activity.list:
-    -  shop-manager_shop
-  activity.save:
-    -  shop-manager_shop
-  logger.all:
-    -  shop-manager_shop
-  logger.get:
-    -  shop-manager_shop
-  logger.list:
-    -  shop-manager_shop
-  card.all:
-    -  shop-manager_shop
-  card.get:
-    -  shop-manager_shop
-  card.list:
-    -  shop-manager_shop
-  card.save:
-    -  shop-manager_shop
-  merchandise.all:
-    -  shop-manager_shop
-  merchandise.delete:
-    -  shop-manager_shop
-  merchandise.list:
-    -  shop-manager_shop
-  merchandise.save:
-    -  shop-manager_shop
-  product.all:
-    -  shop-manager_shop
-  product.delete:
-    -  shop-manager_shop
-  product.list:
-    -  shop-manager_shop
-  product.save:
-    -  shop-manager_shop
-  product_type.all:
-    -  shop-manager_shop
-  product_type.delete:
-    -  shop-manager_shop
-  product_type.list:
-    -  shop-manager_shop
-  product_type.save:
-    -  shop-manager_shop
-  user_coupon.all:
-    -  shop-manager_shop
-  user_coupon.list:
-    -  shop-manager_shop
-  user_coupon.save:
-    -  shop-manager_shop
-  refund.all:
-    -  shop-manager_shop
-  refund.list:
-    -  shop-manager_shop
-  refund.save:
-    -  shop-manager_shop
-  return_location.all:
-    -  shop-manager_shop
-  return_location.list:
-    -  shop-manager_shop
-  return_location.save:
-    -  shop-manager_shop
-  card_apply.all:
-    -  shop-manager_shop
-  card_apply.delete:
-    -  shop-manager_shop
-  card_apply.list:
-    -  shop-manager_shop
-  card_apply.save:
-    -  shop-manager_shop
-shop-weixin:
-  user.addcardapply:
-    -  shop-weixin_kiwifruit
-  user.cardlist:
-    -  shop-weixin_kiwifruit
-  user.couponlist:
-    -  shop-weixin_kiwifruit
-  user.deleteAddress:
-    -  shop-weixin_kiwifruit
-  user.editAddress:
-    -  shop-weixin_kiwifruit
-  user.get_authentication_url:
-    -  shop-weixin_kiwifruit
-  user.info:
-    -  shop-weixin_kiwifruit
-  user.listAddress:
-    -  shop-weixin_kiwifruit
-  user.login:
-    -  shop-weixin_kiwifruit
-  user.point:
-    -  shop-weixin_kiwifruit
-  shoppingcart.get:
-    -  shop-weixin_kiwifruit
-  shoppingcart.list:
-    -  shop-weixin_kiwifruit
-  shoppingcart.post:
-    -  shop-weixin_kiwifruit
-  device.offline:
-    -  shop-weixin_kiwifruit
-  device.online:
-    -  shop-weixin_kiwifruit
-  card.get:
-    -  shop-weixin_kiwifruit
-  user_coupon.add:
-    -  shop-weixin_kiwifruit
-#mango
-  order.cancel:
-    -  shop-weixin_mango
-  order.delete:
-    -  shop-weixin_mango
-  order.get:
-    -  shop-weixin_mango
-  order.get_order_amount:
-    -  shop-weixin_mango
-  order.list:
-    -  shop-weixin_mango
-  order.pay:
-    -  shop-weixin_mango
-  order.post:
-    -  shop-weixin_mango
-  refund.get:
-    -  shop-weixin_mango
-  refund.list:
-    -  shop-weixin_mango
-  refund.post:
-    -  shop-weixin_mango
-  refund.shipping:
-    -  shop-weixin_mango
-#cache
-  merchandise.get:
-    -  shop-weixin_cache_load
-  merchandise.list:
-    -  shop-weixin_cache_load
-
+    - manager_blog

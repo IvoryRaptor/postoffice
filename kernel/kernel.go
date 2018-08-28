@@ -89,7 +89,11 @@ func (po *PostOffice) Authenticate(msg *message.ConnectMessage) *postoffice.Chan
 			}
 		}
 	}
-	return po.GetService("auth").(postoffice.IAuthenticator).Authenticate(&block)
+	res := po.GetService("auth").(postoffice.IAuthenticator).Authenticate(&block)
+	if res == nil {
+		log.Printf("auth fail %s %s %s", block.ClientId, block.Username, block.Password)
+	}
+	return res
 }
 
 func (po *PostOffice) Publish(channel *postoffice.ChannelConfig, resource string, action string, payload []byte) error {

@@ -14,7 +14,7 @@ import (
 
 func main() {
 	k := kernel.PostOffice{}
-	k.New("postoffice")
+	k.New("postoffice", k.SetFields)
 
 	hostname := flag.String("hostname", os.Getenv("hostname"), "is ok")
 	flag.Parse()
@@ -31,10 +31,6 @@ func main() {
 			&iotnn.Singleton,
 			&dragonfly.Singleton,
 		})
-	k.SetFields()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	err = k.Start()
 	if err != nil {
 		log.Fatal(err.Error())

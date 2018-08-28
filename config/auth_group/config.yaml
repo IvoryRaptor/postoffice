@@ -1,0 +1,12 @@
+- matrix: shop-weixin
+  type: oauth
+#  http: http://localhost:9004/api/oauth/tokens?grant_type=authorization_code&code=%s&redirect_uri=https:%2F%2Fwww.example.com
+  http: https://api.weixin.qq.com/sns/jscode2session?appid=wx8b514fb84e8055d4&secret=29d9b05559724a2d3839b026851a8c07&js_code=%s&grant_type=authorization_code
+  method: get
+  headers:
+    Authorization: Basic dGVzdF9jbGllbnRfMTp0ZXN0X3NlY3JldA==1
+  userid: openid
+- matrix: manager
+  type: redis
+  host: redis.default
+  port: 30379
