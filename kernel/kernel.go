@@ -5,9 +5,12 @@ import (
 	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/dragonfly/mq"
 	"github.com/IvoryRaptor/postoffice"
+	"github.com/IvoryRaptor/postoffice/auth"
 	"github.com/IvoryRaptor/postoffice/iotnn"
+	pmq "github.com/IvoryRaptor/postoffice/mq"
 	"github.com/IvoryRaptor/postoffice/mqtt"
 	"github.com/IvoryRaptor/postoffice/mqtt/message"
+	"github.com/IvoryRaptor/postoffice/source"
 	"github.com/golang/protobuf/proto"
 	"github.com/surge/glog"
 	"log"
@@ -26,13 +29,26 @@ type PostOffice struct {
 	topic   string
 }
 
-func (po *PostOffice) SetFields() {
+func (po *PostOffice) New(hostname string) error {
+	po.NewKernel("postoffice")
+	po.Set("matrix", "default")
+	po.Set("angler", hostname)
+	err := dragonfly.Builder(
+		po,
+		[]dragonfly.IServiceFactory{
+			&source.Singleton,
+			&auth.Singleton,
+			&pmq.Singleton,
+			&iotnn.Singleton,
+			&dragonfly.Singleton,
+		})
 	po.auth = po.GetService("auth").(postoffice.IAuthenticator)
 	po.clients = sync.Map{}
 	po.mq = po.GetService("mq").(mq.IMQ)
 	po.redis = po.GetService("redis").(*dragonfly.Redis)
 	po.iotnn = po.GetService("iotnn").(iotnn.IOTNN)
 	po.topic = fmt.Sprintf("%s_%s", po.Get("matrix"), po.Get("angler"))
+	return err
 }
 
 func (po *PostOffice) GetTopics(matrix string, action string) []string {
