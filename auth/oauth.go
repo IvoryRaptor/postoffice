@@ -98,7 +98,7 @@ func (m *OAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.ChannelCon
 	case 98:
 		url := fmt.Sprintf(m.httpFmt, block.DeviceName)
 		client := &http.Client{}
-		//fmt.Println(url)
+		fmt.Println(url)
 		if strings.LastIndex(url, "https://") >= 0 {
 			client.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
 		}
@@ -116,7 +116,7 @@ func (m *OAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.ChannelCon
 			log.Printf("Http %s :%s", url, err.Error())
 			return nil
 		}
-		//println(body)
+		fmt.Printf("%s\n", body)
 		////if len(res) == 0 {
 		//println(len(body))
 		//if len("") == 0 {

@@ -41,3 +41,6 @@ source:
   - type: websocket
     ssl: false
     port: 8080
+work_plus:
+  reply:
+    file: reply.so

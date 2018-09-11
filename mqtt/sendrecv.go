@@ -21,8 +21,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/IvoryRaptor/postoffice-plus/message"
 	"github.com/surge/glog"
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
 )
 
 type netReader interface {

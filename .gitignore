@@ -17,3 +17,5 @@ go_build_main_go
 /config/iotnn/
 /config/cert/
 
+/test
+/images

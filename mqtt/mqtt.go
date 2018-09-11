@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/IvoryRaptor/postoffice"
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
+	"github.com/IvoryRaptor/postoffice-plus/message"
 	"log"
 	"net"
 )
@@ -57,8 +57,6 @@ func (m *MQTT) AddChannel(conn net.Conn) (err error) {
 		//return err
 	}
 
-	m.Kernel.Publish(channel, "device", "online", []byte(channel.Token))
-	fmt.Printf("%s device online\n", string([]byte(channel.DeviceName)))
 	if req.KeepAlive() == 0 {
 		req.SetKeepAlive(minKeepAlive)
 	}
@@ -86,5 +84,8 @@ func (m *MQTT) AddChannel(conn net.Conn) (err error) {
 		svc.Stop()
 		return err
 	}
+
+	m.Kernel.Publish(channel, "device", "online", []byte(channel.Token))
+	fmt.Printf("%s device online\n", string([]byte(channel.DeviceName)))
 	return nil
 }

@@ -17,7 +17,7 @@ package mqtt
 import (
 	"errors"
 	"fmt"
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
+	"github.com/IvoryRaptor/postoffice-plus/message"
 	"io"
 	"strings"
 )

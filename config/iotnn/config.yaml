@@ -107,3 +107,6 @@ manager:
     - manager_blog
   document.save:
     - manager_blog
+shop-weixin:
+  device.online:
+    - plus.reply

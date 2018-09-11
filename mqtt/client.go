@@ -16,17 +16,17 @@ package mqtt
 
 import (
 	"fmt"
+	"github.com/IvoryRaptor/postoffice"
+	"github.com/IvoryRaptor/postoffice-plus/message"
+	"github.com/surge/glog"
 	"io"
 	"sync"
 	"sync/atomic"
-	"github.com/surge/glog"
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"github.com/IvoryRaptor/postoffice"
 )
 
 type (
 	OnCompleteFunc func(msg, ack message.Message, err error) error
-	OnPublishFunc func(msg *message.PublishMessage) error
+	OnPublishFunc  func(msg *message.PublishMessage) error
 )
 
 type stat struct {

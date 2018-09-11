@@ -17,9 +17,9 @@ package mqtt
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/IvoryRaptor/postoffice-plus/message"
 	"io"
 	"net"
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
 )
 
 func getConnectMessage(conn io.Closer) (*message.ConnectMessage, error) {

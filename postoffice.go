@@ -1,9 +1,9 @@
 package postoffice
 
 import (
-	"github.com/IvoryRaptor/postoffice/mqtt/message"
-	"github.com/IvoryRaptor/dragonfly/mq"
 	"github.com/IvoryRaptor/dragonfly"
+	"github.com/IvoryRaptor/dragonfly/mq"
+	"github.com/IvoryRaptor/postoffice-plus/message"
 )
 
 type ChannelConfig struct {
