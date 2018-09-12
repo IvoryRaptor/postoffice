@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/IvoryRaptor/postoffice"
-	"github.com/IvoryRaptor/postoffice-plus/message"
+	"github.com/IvoryRaptor/postoffice-plus/mqtt/message"
 	"log"
 	"net"
 )

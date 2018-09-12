@@ -21,7 +21,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/IvoryRaptor/postoffice-plus/message"
+	"github.com/IvoryRaptor/postoffice-plus/mqtt/message"
 	"github.com/surge/glog"
 )
 

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/IvoryRaptor/postoffice-plus"
-	"github.com/IvoryRaptor/postoffice-plus/message"
+	"github.com/IvoryRaptor/postoffice-plus/mqtt/message"
 )
 
 type Reply struct {

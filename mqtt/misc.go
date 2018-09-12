@@ -17,7 +17,7 @@ package mqtt
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/IvoryRaptor/postoffice-plus/message"
+	"github.com/IvoryRaptor/postoffice-plus/mqtt/message"
 	"io"
 	"net"
 )

@@ -6,7 +6,7 @@ import (
 	"github.com/IvoryRaptor/dragonfly/mq"
 	"github.com/IvoryRaptor/postoffice"
 	"github.com/IvoryRaptor/postoffice-plus"
-	"github.com/IvoryRaptor/postoffice-plus/message"
+	"github.com/IvoryRaptor/postoffice-plus/mqtt/message"
 	"github.com/IvoryRaptor/postoffice/auth"
 	"github.com/IvoryRaptor/postoffice/iotnn"
 	pmq "github.com/IvoryRaptor/postoffice/mq"

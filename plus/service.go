@@ -3,12 +3,13 @@ package plus
 import (
 	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/postoffice-plus"
+	mq_plus "github.com/IvoryRaptor/postoffice-plus/mqtt"
 	"github.com/IvoryRaptor/postoffice/mqtt"
 	"plugin"
 )
 
 type Service struct {
-	plus map[string]postoffice_plus.IWorkPlus
+	plus map[string]mq_plus.IWorkPlus
 }
 
 func (s *Service) Work(client *mqtt.Client, name string, msg *postoffice_plus.MQMessage) error {
@@ -33,7 +34,7 @@ func (s *Service) Config(kernel dragonfly.IKernel, config map[interface{}]interf
 		if err != nil {
 			panic(err)
 		}
-		res, err := factory.(func(config map[interface{}]interface{}) (postoffice_plus.IWorkPlus, error))(conf)
+		res, err := factory.(func(config map[interface{}]interface{}) (mq_plus.IWorkPlus, error))(conf)
 		s.plus[name.(string)] = res
 	}
 	return nil

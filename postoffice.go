@@ -3,7 +3,7 @@ package postoffice
 import (
 	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/dragonfly/mq"
-	"github.com/IvoryRaptor/postoffice-plus/message"
+	"github.com/IvoryRaptor/postoffice-plus/mqtt/message"
 )
 
 type ChannelConfig struct {
