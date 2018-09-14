@@ -3,13 +3,13 @@ package postoffice
 import (
 	"github.com/IvoryRaptor/dragonfly"
 	"github.com/IvoryRaptor/dragonfly/mq"
+	"github.com/IvoryRaptor/postoffice-plus"
 	"github.com/IvoryRaptor/postoffice-plus/mqtt/message"
 )
 
 type ChannelConfig struct {
 	DeviceName string
 	Matrix     string
-	Token      string
 }
 
 type AuthBlock struct {
@@ -30,7 +30,8 @@ type IAuthenticator interface {
 }
 
 type IClient interface {
-	Publish(msg *message.PublishMessage) error
+	Send(msg *postoffice_plus.MQMessage) error
+	Stop()
 }
 
 type IPostOffice interface {

@@ -73,7 +73,7 @@ func (c *Client) receiver() {
 
 			if err != nil {
 				if err != io.EOF {
-					c.kernel.Publish(c.channel, "device", "offline", []byte(c.channel.Token))
+					c.kernel.Publish(c.channel, "device", "offline", []byte{})
 					c.kernel.Close(c.cid())
 					glog.Errorf("(%s) error reading from connection: %v", c.cid(), err)
 				}
@@ -272,14 +272,14 @@ func (c *Client) writeMessage(msg message.Message) (int, error) {
 	}
 
 	// This is to serialize writes to the underlying buffer. Multiple goroutines could
-	// potentially get here because of calling Publish() or Subscribe() or other
+	// potentially get here because of calling Send() or Subscribe() or other
 	// functions that will send messages. For example, if a message is received in
 	// another connetion, and the message needs to be published to c Client, then
-	// the Publish() function is called, and at the same time, another Client could
+	// the Send() function is called, and at the same time, another Client could
 	// do exactly the same thing.
 	//
 	// Not an ideal fix though. If possible we should remove mutex and be lockfree.
-	// Mainly because when there's a large number of goroutines that want to Publish
+	// Mainly because when there's a large number of goroutines that want to Send
 	// to c Client, then they will all block. However, c will do for now.
 	//
 	// FIXME: Try to find a better way than a mutex...if possible.

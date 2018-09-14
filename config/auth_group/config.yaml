@@ -5,7 +5,7 @@
   method: get
   headers:
     Authorization: Basic dGVzdF9jbGllbnRfMTp0ZXN0X3NlY3JldA==1
-  userid: openid
+  device: openid
 - matrix: manager
   type: redis
   host: redis.default

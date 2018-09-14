@@ -17,6 +17,7 @@ package mqtt
 import (
 	"fmt"
 	"github.com/IvoryRaptor/postoffice"
+	"github.com/IvoryRaptor/postoffice-plus"
 	"github.com/IvoryRaptor/postoffice-plus/mqtt/message"
 	"github.com/surge/glog"
 	"io"
@@ -89,7 +90,7 @@ type Client struct {
 	//
 	// For the server, when this method is called, it means there's a message that
 	// should be published to the Client on the other end of this connection. So we
-	// will call Publish() to send the message.
+	// will call Send() to send the message.
 	onpub OnPublishFunc
 
 	inStat  stat
@@ -206,7 +207,7 @@ func (c *Client) Stop() {
 	//	}
 	//}
 	//
-	//// Publish will message if WillFlag is set. Server side only.
+	//// Send will message if WillFlag is set. Server side only.
 	//if !c.Client && c.sess.Cmsg.WillFlag() {
 	//	glog.Infof("(%s) Client/stop: connection unexpectedly closed. Sending Will.", c.cid())
 	//	c.onPublish(c.sess.Will)
@@ -226,9 +227,21 @@ func (c *Client) Stop() {
 	c.in = nil
 	c.out = nil
 }
-
+func (c *Client) Send(msg *postoffice_plus.MQMessage) error {
+	pus := message.NewPublishMessage()
+	channel := c.GetChannel()
+	topic := fmt.Sprintf(
+		"%s/%s/%s/%s",
+		channel.Matrix,
+		channel.DeviceName,
+		msg.Resource,
+		msg.Action)
+	pus.SetTopic([]byte(topic))
+	pus.SetPayload(msg.Payload)
+	return c.Publish(pus)
+}
 func (c *Client) Publish(msg *message.PublishMessage) error {
-	//glog.Debugf("Client/Publish: Publishing %s", msg)
+	//glog.Debugf("Client/Send: Publishing %s", msg)
 	_, err := c.writeMessage(msg)
 	if err != nil {
 		return fmt.Errorf("(%s) Error sending %s message: %v", c.cid(), msg.Name(), err)

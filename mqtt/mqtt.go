@@ -85,7 +85,7 @@ func (m *MQTT) AddChannel(conn net.Conn) (err error) {
 		return err
 	}
 
-	m.Kernel.Publish(channel, "device", "online", []byte(channel.Token))
+	m.Kernel.Publish(channel, "device", "online", []byte{})
 	fmt.Printf("%s device online\n", string([]byte(channel.DeviceName)))
 	return nil
 }

@@ -1,19 +1,19 @@
 package auth
 
 import (
-	"github.com/IvoryRaptor/postoffice"
-	"time"
-	"gopkg.in/mgo.v2/bson"
-	"math/rand"
-	"github.com/IvoryRaptor/dragonfly"
-	"log"
-	"fmt"
 	"crypto/hmac"
-	"crypto/sha1"
 	"crypto/md5"
-	"sort"
+	"crypto/sha1"
+	"fmt"
+	"github.com/IvoryRaptor/dragonfly"
+	"github.com/IvoryRaptor/postoffice"
+	"gopkg.in/mgo.v2/bson"
 	"hash"
+	"log"
+	"math/rand"
+	"sort"
 	"strings"
+	"time"
 )
 
 type MongoAuth struct {
@@ -85,7 +85,6 @@ func (m *MongoAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.Channe
 	config := postoffice.ChannelConfig{
 		DeviceName: block.DeviceName,
 		Matrix:     block.ProductKey,
-		Token:      token,
 	}
 	return &config
 }

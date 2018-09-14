@@ -1,51 +1,54 @@
 package main
 
 import (
-	"github.com/IvoryRaptor/postoffice-plus"
-	"plugin"
-	"regexp"
+	"encoding/json"
+	"github.com/jmoiron/jsonq"
+	"html/template"
+	"os"
+	"strings"
 )
 
-func TTT(conf map[interface{}]interface{}) postoffice_plus.IWorkPlus {
-	p, err := plugin.Open("./other/p1.so")
-	if err != nil {
-		panic(err)
-	}
-	config, err := p.Lookup("Factory")
-	if err != nil {
-		panic(err)
-	}
-
-	res, err := config.(func(config map[interface{}]interface{}) (postoffice_plus.IWorkPlus, error))(conf)
-	return res
-}
-
-var PlusRegexp = regexp.MustCompile(`^plus\.[\w]+`)
-
 func main() {
-	var d = "plus.reply"
-	var d2 = "plus"
+	data := map[string]interface{}{}
+	dec := json.NewDecoder(strings.NewReader(`{"foo": 1,
+	"bar": 2,
+	"test": "Hello, world!",
+	"baz": 123.1,
+	"array": [
+		{"foo": 1},
+		{"bar": 2},
+		{"baz": 3}
+	],
+	"subobj": {
+		"foo": 1,
+		"subarray": [1,2,3],
+		"subsubobj": {
+			"bar": 2,
+			"baz": 3,
+			"array": ["hello", "world"]
+		}
+	},
+	"bool": true}`))
 
-	//println("plus.reply"[0:5])
-	println(d[0:5])
+	dec.Decode(&data)
+	jq := jsonq.NewQuery(data)
+	var d = []string{"subobj", "subsubobj", "array", "0"}
 
-	if len(d2) > 5 && d2[0:5] == "plus." {
-		println(d2[0:5])
+	s, err := jq.String(d...)
+	if err != nil {
+		println(err.Error())
+	} else {
+		println(s)
 	}
 
-	//println("[" + PlusRegexp.FindString("plus.reply") + "]")
-	//println("[" + PlusRegexp.FindString("plus_reply") + "]")
-	//println("[" + PlusRegexp.FindString("asdf.") + "]")
-	//
-	//conf1 := map[interface{}]interface{}{
-	//	"name": "test1",
-	//}
-	//conf2 := map[interface{}]interface{}{
-	//	"name": "test2",
-	//}
-	//r1 := TTT(conf1)
-	//r2 := TTT(conf2)
-	//
-	//r1.Work(&postoffice_plus.MQMessage{})
-	//r2.Work(&postoffice_plus.MQMessage{})
+	tmpl := template.New("tmpl1")
+	_, err = tmpl.Parse(`Hello {{.String("subobj", "subsubobj", "array", "0")}} Welcome to go programming...\n`)
+	if err != nil {
+		println(err.Error())
+		return
+	}
+	err = tmpl.Execute(os.Stdout, jq)
+	if err != nil {
+		println(err.Error())
+	}
 }

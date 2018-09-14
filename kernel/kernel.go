@@ -188,8 +188,7 @@ func (po *PostOffice) Arrive(data []byte) {
 	log.Printf("%s=>%s/%s|%s.%s", msg.Caller, msg.Matrix, msg.Device, msg.Action, msg.Resource)
 	val, ok := po.clients.Load(msg.Matrix + "/" + msg.Device)
 	if ok {
-		client := val.(*mqtt.Client)
-		channel := client.GetChannel()
+		client := val.(postoffice.IClient)
 		switch msg.Resource {
 		case "system":
 			switch msg.Action {
@@ -199,16 +198,7 @@ func (po *PostOffice) Arrive(data []byte) {
 
 			}
 		default:
-			pus := message.NewPublishMessage()
-			topic := fmt.Sprintf(
-				"%s/%s/%s/%s",
-				channel.Matrix,
-				channel.DeviceName,
-				msg.Resource,
-				msg.Action)
-			pus.SetTopic([]byte(topic))
-			pus.SetPayload(msg.Payload)
-			client.Publish(pus)
+			client.Send(&msg)
 		}
 	} else {
 		log.Printf("MISS Matrix:%s Resource:%s Action:%s\n", msg.Matrix, msg.Resource, msg.Action)

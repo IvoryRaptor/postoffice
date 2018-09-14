@@ -236,7 +236,7 @@ func (c *Client) processUnsubscribe(msg *message.UnsubscribeMessage) error {
 }
 
 // onPublish() is called when the server receives a PUBLISH message AND have completed
-// the ack cycle. This method will get the list of subscribers based on the Publish
+// the ack cycle. This method will get the list of subscribers based on the Send
 // topic, and publishes the message to the list of subscribers.
 func (c *Client) onPublish(msg *message.PublishMessage) error {
 	if msg.Retain() {

@@ -48,7 +48,7 @@ type OAuth struct {
 	httpFmt string
 	method  string
 	headers map[interface{}]interface{}
-	userid  string
+	device  string
 	parser  IParser
 }
 
@@ -129,13 +129,13 @@ func (m *OAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.ChannelCon
 			return nil
 		}
 		//response := f.(map[string]interface{})
-		if _, ok2 := response[m.userid]; !ok2 {
+		if _, ok2 := response[m.device]; !ok2 {
 			glog.Error("error code ", block.DeviceName)
 			return nil
 		}
 
 		config := postoffice.ChannelConfig{
-			DeviceName: response[m.userid].(string),
+			DeviceName: response[m.device].(string),
 			Matrix:     block.ProductKey,
 		}
 		log.Println("config ok ")
@@ -162,7 +162,7 @@ func (m *OAuth) Config(kernel dragonfly.IKernel, config map[interface{}]interfac
 		m.parser.Init(config)
 	}
 	m.method = config["method"].(string)
-	m.userid = config["userid"].(string)
+	m.device = config["device"].(string)
 	m.headers = config["headers"].(map[interface{}]interface{})
 	return nil
 }

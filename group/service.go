@@ -13,7 +13,7 @@ package group
 //	dragonfly.Zookeeper
 //}
 //
-//func (s *Service) Publish(topic string, actor []byte, payload []byte) error {
+//func (s *Service) Send(topic string, actor []byte, payload []byte) error {
 //	return s.KafkaPublish(topic, kafka.PartitionAny, actor, payload)
 //}
 //

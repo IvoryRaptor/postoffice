@@ -74,7 +74,6 @@ func (m *RedisAuth) Authenticate(block *postoffice.AuthBlock) *postoffice.Channe
 	config := postoffice.ChannelConfig{
 		DeviceName: block.DeviceName,
 		Matrix:     block.ProductKey,
-		Token:      token,
 	}
 	return &config
 }
